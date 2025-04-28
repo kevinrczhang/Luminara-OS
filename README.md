@@ -1,0 +1,35 @@
+# DonkeyOS (a work in progress)
+
+A minimal hobby OS project in C++ using GRUB, QEMU, and Vagrant.
+
+## Prerequisites
+
+- **Host (Windows)**
+  - VirtualBox 7.x installed
+  - Vagrant 2.x installed
+- **Guest (Ubuntu 22.04 via Vagrant)**
+  - build-essential, gcc-multilib, g++-multilib
+  - nasm (via `as --32`), bison, flex, texinfo
+  - grub-pc-bin, xorriso
+  - qemu-system-i386, gdb-multiarch
+
+All guest dependencies are automatically provisioned by the Vagrantfile.
+
+## To Start
+
+1. **Bring up the VM**  
+   ```
+   sh
+   vagrant up
+   ```
+2. **SSH into the VM**  
+   ```
+   vagrant ssh
+   ```
+3. **Build and run the OS!**  
+   ```
+   cd /home/vagrant/osdev
+   make run
+   ```
+
+   You should see "Hello, world!" printed to the console.

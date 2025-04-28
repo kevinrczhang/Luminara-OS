@@ -1,0 +1,19 @@
+# Vagrant environment
+.vagrant/
+
+# Build artifacts
+build/
+isodir/
+*.iso
+*.bin
+
+# Editor and OS files
+*.swp
+*.swx
+*.DS_Store
+.vscode/
+.idea/
+
+# Logs and temp files
+*.log
+tmp/
