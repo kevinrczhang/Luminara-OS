@@ -34,7 +34,9 @@ $(BUILD_DIR)/os.iso: $(BUILD_DIR)/kernel.bin grub.cfg | $(BUILD_DIR)
 iso: $(BUILD_DIR)/os.iso
 
 run: iso
-	qemu-system-i386 -cdrom $(BUILD_DIR)/os.iso -nographic
+	qemu-system-i386 -cdrom $(BUILD_DIR)/os.iso \
+		-curses
+
 clean:
 	rm -rf $(BUILD_DIR) isodir
 
