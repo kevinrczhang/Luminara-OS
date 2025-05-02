@@ -41,7 +41,17 @@ public:
 			}
         }
     }
+    void deleteChar() {
+        if (col_ == 0 && row_ == 0) return;
 
+        if (col_ == 0) {
+            row_--;
+            col_ = kWidth -1;
+        } else {
+            col_--;
+        }
+        putAt(' ', col_, row_);
+    }
     void write(const char* data, size_t len) {
         for (size_t i = 0; i < len; ++i) {
 			putChar(data[i]);
@@ -95,7 +105,11 @@ extern "C" void kernelMain() {
     while (true) {
         char c = get_key();
         if (c) {
-            terminal.putChar(c);
+            if (c == '/b') {
+
+            } else {
+                terminal.putChar(c);
+            }
         }
     }
 }
