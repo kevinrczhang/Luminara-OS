@@ -106,7 +106,7 @@ extern "C" void kernelMain() {
         char c = get_key();
         if (c) {
             if (c == '/b') {
-
+                terminal.deleteChar();
             } else {
                 terminal.putChar(c);
             }
