@@ -19,8 +19,11 @@ $(BUILD_DIR)/loader.o: $(SRC_DIR)/loader.s | $(BUILD_DIR)
 $(BUILD_DIR)/kernel.o: $(SRC_DIR)/kernel.cpp | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/kernel.bin: $(BUILD_DIR)/loader.o $(BUILD_DIR)/kernel.o linker.ld | $(BUILD_DIR)
-	$(LD) $(LDFLAGS) $(BUILD_DIR)/loader.o $(BUILD_DIR)/kernel.o -o $@
+$(BUILD_DIR)/keyboard.o: $(SRC_DIR)/keyboard.s | $(BUILD_DIR)
+	$(AS) $(ASFLAGS) -o $@ $<
+
+$(BUILD_DIR)/kernel.bin: $(BUILD_DIR)/loader.o $(BUILD_DIR)/kernel.o $(BUILD_DIR)/keyboard.o linker.ld | $(BUILD_DIR)
+	$(LD) $(LDFLAGS) $(BUILD_DIR)/loader.o $(BUILD_DIR)/kernel.o $(BUILD_DIR)/keyboard.o -o $(BUILD_DIR)/kernel.bin
 
 $(BUILD_DIR)/os.iso: $(BUILD_DIR)/kernel.bin grub.cfg | $(BUILD_DIR)
 	mkdir -p isodir/boot/grub

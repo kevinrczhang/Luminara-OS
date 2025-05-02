@@ -1,25 +1,101 @@
-#include <stddef.h>
-extern "C" void kernelMain();
+#include <cstddef>
+#include <cstdint>
 
-// VGA text-mode buffer at 0xB8000
-static volatile unsigned short* const VGA = (unsigned short*)0xB8000;
-static unsigned int cursor = 0;
+enum class Color : uint8_t {
+    Black = 0, Blue, Green, Cyan, Red, Magenta, Brown, LightGrey,
+    DarkGrey, LightBlue, LightGreen, LightCyan, LightRed, LightMagenta, 
+	LightBrown, White,
+};
 
-// write one character with white-on-black attribute
-extern "C" void putchar(char c) {
-    VGA[cursor++] = (unsigned char)c | (0x07 << 8);
-}
+constexpr size_t kWidth = 80;
+constexpr size_t kHeight = 25;
+constexpr uintptr_t kVideoMem = 0xB8000;
 
-// only handles C-strings at the moment
-extern "C" void printf(const char* str) {
-    for (size_t i = 0; str[i] != '\0'; ++i) {
-        putchar(str[i]);
+class Terminal {
+public:
+    Terminal()
+        : row_(0), col_(0),
+          color_(entryColor(Color::LightCyan, Color::Black)),
+          buffer_(reinterpret_cast<uint16_t*>(kVideoMem)) {}
+
+    void init() {
+        row_ = col_ = 0;
+        for (size_t y = 0; y < kHeight; ++y) {
+			for (size_t x = 0; x < kWidth; ++x) {
+				putAt(' ', x, y);
+			}
+		}
     }
-}
+
+    void setColor(Color fg, Color bg) {
+        color_ = entryColor(fg, bg);
+    }
+
+    void putChar(char c) {
+        if (c == '\n') {
+            newline();
+        } else {
+            putAt(c, col_, row_);
+            if (++col_ == kWidth) {
+				newline();
+			}
+        }
+    }
+
+    void write(const char* data, size_t len) {
+        for (size_t i = 0; i < len; ++i) {
+			putChar(data[i]);
+		}
+    }
+
+    void writeStr(const char* s) {
+        write(s, strlen(s));
+    }
+
+private:
+    size_t row_, col_;
+    uint8_t color_;
+    uint16_t* const buffer_;
+
+    void newline() {
+        col_ = 0;
+        if (++row_ == kHeight) {
+			row_ = 0;
+		}
+    }
+
+    void putAt(char c, size_t x, size_t y) {
+        const size_t idx = y * kWidth + x;
+        buffer_[idx] = entry(c, color_);
+    }
+
+    static uint8_t entryColor(Color fg, Color bg) {
+        return static_cast<uint8_t>(fg) | (static_cast<uint8_t>(bg) << 4);
+    }
+
+    static uint16_t entry(char c, uint8_t color) {
+        return static_cast<uint16_t>(c) | (static_cast<uint16_t>(color) << 8);
+    }
+
+    static size_t strlen(const char* s) {
+		const char* p = s;
+		while (*p) {
+			++p;
+		}
+		return p - s;
+	}
+};
 
 extern "C" void kernelMain() {
-    printf("Hello, world!");
-    while (1) {
-        asm volatile("hlt");
+    Terminal terminal;
+    terminal.init();
+    terminal.writeStr("Hello, World!\n:D");
+    terminal.writeStr("Type, I echo:\n");
+    extern char get_key();
+    while (true) {
+        char c = get_key();
+        if (c) {
+            terminal.putChar(c);
+        }
     }
 }
