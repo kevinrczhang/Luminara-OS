@@ -141,9 +141,9 @@ iso: $(BUILD_DIR)/os.iso
 # Run the OS using the QEMU emulator.
 # QEMU treats os.iso as if it's a physical CD-ROM inserted into a virtual computer.
 run: iso
-	qemu-system-i386 -cdrom $(BUILD_DIR)/os.iso -curses
+	qemu-system-i386 -cdrom $(BUILD_DIR)/os.iso \
+		-curses
 
-# Clean all build artifacts.
 clean:
 	rm -rf $(BUILD_DIR) iso_dir
 
