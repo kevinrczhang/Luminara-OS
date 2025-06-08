@@ -41,6 +41,7 @@ public:
 			}
         }
     }
+
     void deleteChar() {
         if (col_ == 0 && row_ == 0) return;
 
@@ -52,6 +53,7 @@ public:
         }
         putAt(' ', col_, row_);
     }
+    
     void write(const char* data, size_t len) {
         for (size_t i = 0; i < len; ++i) {
 			putChar(data[i]);
