@@ -1,5 +1,6 @@
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 
 enum class Color : uint8_t {
     Black = 0, Blue, Green, Cyan, Red, Magenta, Brown, LightGrey,
@@ -41,7 +42,29 @@ public:
 			}
         }
     }
+    void scrollScreen() {
 
+        // step 1: get the memory-mapped i/o address for the vga text buffer
+        char* video = (char *) kVideoMem;
+        int row_size = kWidth * 2;
+        
+        // start from 1 because we want to move all rows up by one to start a new line
+        // we start with the left most char and copy them over to the next line (hence char*)
+        for (int i = 1; i < kHeight; i++) {
+            char* src = video + i * row_size;
+            char* dest = video + (i - 1) * row_size;
+            for (int j = 0; j < row_size; j++) {
+                dest[j] = src[j];
+            }  
+        }
+
+        // and then since we've moved everything up already, we want to clear that last line to be blank for us to 
+        // populate text with
+        char* last_line = video + (kHeight - 1) * row_size;
+        for (int i = 0; i < kWidth; i++) {
+            last_line[i * 2] = ' ';
+        }
+    }
     void deleteChar() {
         if (col_ == 0 && row_ == 0) return;
 
@@ -72,8 +95,9 @@ private:
     void newline() {
         col_ = 0;
         if (++row_ == kHeight) {
-			row_ = 0;
-		}
+            scrollScreen();
+            row_ = kHeight - 1;
+        }
     }
 
     void putAt(char c, size_t x, size_t y) {
