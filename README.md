@@ -19,7 +19,6 @@ All guest dependencies are automatically provisioned by the Vagrantfile.
 
 1. **Bring up the VM**  
    ```
-   sh
    vagrant up
    ```
 2. **SSH into the VM**  
@@ -28,8 +27,6 @@ All guest dependencies are automatically provisioned by the Vagrantfile.
    ```
 3. **Build and run the OS!**  
    ```
-   cd /home/vagrant/osdev
+   cd /osdev
    make run
    ```
-
-   You should see "Hello, world!" printed to the console.

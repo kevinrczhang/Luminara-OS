@@ -6,24 +6,17 @@
 
 .set CHECKSUM, -(MAGIC + FLAGS)
 
-.section .multiboot
+# This section must be within the first 8192 bytes of the kernel file.
+# It is what the bootloader searches for when attemping to load a kernel.
+.section multiboot
     .long MAGIC
     .long FLAGS
     .long CHECKSUM
 
-# The section above must be within the first 8192 bytes of the kernel file.
-# It is what the bootloader searches for when attemping to load a kernel.
-# The reason I couldn't place this comment above is because for some reason
-# that affected how the kernel was loaded? Perhaps the comments affected the
-# final layout of the binary and pushed the .multiboot specification to the
-# wrong place?
-
 .section .text
 
-# Tells the assembler there is going to be a function called kernel_main.
-.extern kernel_main
-
-.extern call_constructors
+# Tells the assembler there is going to be a function called kernelMain.
+.extern kernelMain
 
 # ".global" allows other files to call it.
 .global _start
@@ -42,11 +35,11 @@ _start:
     # Some of the info includes what we asked for in the flags above!
     push %ebx
     
-    call kernel_main
+    call kernelMain
 
 # Theoretically, our kernel should be going in an infinite loop.
 # However, in the event we end up here, we stay in a loop.
-# TODO: See if we actually need this (should never happen).
+# TODO: See if we actually need this.
 _stop:
     cli
     hlt

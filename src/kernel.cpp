@@ -1,141 +1,105 @@
-#include <cstddef>
-#include <cstdint>
-#include <cstring>
+#include "gdt.h"
+#include "interrupts.h"
+#include "keyboard.h"
+#include "terminal.h"
+#include "types.h"
 
-enum class Color : uint8_t {
-    Black = 0, Blue, Green, Cyan, Red, Magenta, Brown, LightGrey,
-    DarkGrey, LightBlue, LightGreen, LightCyan, LightRed, LightMagenta, 
-	LightBrown, White,
-};
+// This defines a function pointer type for constructors.
+typedef void (*constructor)();
+extern "C" constructor start_ctors;
+extern "C" constructor end_ctors;
 
-constexpr size_t kWidth = 80;
-constexpr size_t kHeight = 25;
-constexpr uintptr_t kVideoMem = 0xB8000;
-
-class Terminal {
-public:
-    Terminal()
-        : row_(0), col_(0),
-          color_(entryColor(Color::LightCyan, Color::Black)),
-          buffer_(reinterpret_cast<uint16_t*>(kVideoMem)) {}
-
-    void init() {
-        row_ = col_ = 0;
-        for (size_t y = 0; y < kHeight; ++y) {
-			for (size_t x = 0; x < kWidth; ++x) {
-				putAt(' ', x, y);
-			}
-		}
+// We want to call all the global constructors we defined before main.
+extern "C" void call_constructors()
+{
+    for (constructor* i = &start_ctors; i != &end_ctors; ++i) {
+        (*i)();
     }
+}
 
-    void setColor(Color fg, Color bg) {
-        color_ = entryColor(fg, bg);
-    }
-
-    void putChar(char c) {
-        if (c == '\n') {
-            newline();
-        } else {
-            putAt(c, col_, row_);
-            if (++col_ == kWidth) {
-				newline();
-			}
-        }
-    }
-    void scrollScreen() {
-
-        // step 1: get the memory-mapped i/o address for the vga text buffer
-        char* video = (char *) kVideoMem;
-        int row_size = kWidth * 2;
-        
-        // start from 1 because we want to move all rows up by one to start a new line
-        // we start with the left most char and copy them over to the next line (hence char*)
-        for (int i = 1; i < kHeight; i++) {
-            char* src = video + i * row_size;
-            char* dest = video + (i - 1) * row_size;
-            for (int j = 0; j < row_size; j++) {
-                dest[j] = src[j];
-            }  
-        }
-
-        // and then since we've moved everything up already, we want to clear that last line to be blank for us to 
-        // populate text with
-        char* last_line = video + (kHeight - 1) * row_size;
-        for (int i = 0; i < kWidth; i++) {
-            last_line[i * 2] = ' ';
-        }
-    }
-    void deleteChar() {
-        if (col_ == 0 && row_ == 0) return;
-
-        if (col_ == 0) {
-            row_--;
-            col_ = kWidth -1;
-        } else {
-            col_--;
-        }
-        putAt(' ', col_, row_);
-    }
+void print_donkey_ascii()
+{
+    printf_colored("############### DONKEY OS ###############\n", VGA_COLOR_YELLOW_ON_BLACK);
     
-    void write(const char* data, size_t len) {
-        for (size_t i = 0; i < len; ++i) {
-			putChar(data[i]);
-		}
-    }
+    // Donko
+    printf_colored("       ___,A.A_  __\n", VGA_COLOR_LIGHT_GRAY_ON_BLACK);
+    printf_colored("       \\   ,   7\"_/\n", VGA_COLOR_LIGHT_GRAY_ON_BLACK);
+    printf_colored("        ~\"T(  O O)   <- Hee-haw!\n", VGA_COLOR_YELLOW_ON_BLACK);
+    printf_colored("          | \\    Y\n", VGA_COLOR_LIGHT_GRAY_ON_BLACK);
+    printf_colored("          |  ~\\ .|\n", VGA_COLOR_LIGHT_GRAY_ON_BLACK);
+    printf_colored("          |   |`-'\n", VGA_COLOR_LIGHT_GRAY_ON_BLACK);
+    printf_colored("          |   |\n", VGA_COLOR_LIGHT_GRAY_ON_BLACK);
+    printf_colored("          j   l\n", VGA_COLOR_LIGHT_GRAY_ON_BLACK);
+    printf_colored("         /     \\\n", VGA_COLOR_LIGHT_GRAY_ON_BLACK);
+    printf_colored("        Y       Y\n", VGA_COLOR_LIGHT_GRAY_ON_BLACK);
+    printf_colored("        |_|   |_|   Ready to boot!\n", VGA_COLOR_CYAN_ON_BLACK);
+    printf_colored("########################################\n", VGA_COLOR_YELLOW_ON_BLACK);
+}
 
-    void writeStr(const char* s) {
-        write(s, strlen(s));
-    }
+/**
+ * The main kernel entry point
+ * 
+ * This is where the kernel starts execution after being loaded by the bootloader.
+ * It initializes all system components and then enters into an infinite loop.
+ */
+extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_magic_number)
+{
+    // We initialize the terminal first so we can display output.
+    initialize_terminal();
+    
+    // Print the donkey ASCII art first! (I eventually want to make the screen bigger).
+    print_donkey_ascii();
+    
+    printf_colored("=== Donkey OS Kernel ===\n", VGA_COLOR_YELLOW_ON_BLACK);
+    
+    /**
+     * Remember when we pushed the multiboot magic number onto the stack in the loader.s code?
+     * 
+     * We can now pop it off the stack to verify that the kernel was loaded correctly!
+     */
+    if (multiboot_magic_number == 0x2badb002) {
+        printf_colored("✓ Kernel loaded successfully!\n", VGA_COLOR_GREEN_ON_BLACK);
+    }  else {
+        printf_colored("✗ ERROR: Invalid multiboot magic number!\n", VGA_COLOR_RED_ON_BLACK);
+        printf("Expected: 0x2badb002, Got: 0x");
+        
+        // This is to display the magic number we got in hex.
+        char hex_digits[] = "0123456789ABCDEF";
 
-private:
-    size_t row_, col_;
-    uint8_t color_;
-    uint16_t* const buffer_;
-
-    void newline() {
-        col_ = 0;
-        if (++row_ == kHeight) {
-            scrollScreen();
-            row_ = kHeight - 1;
+        for (int i = 7; i >= 0; --i) {
+            put_char(hex_digits[(multiboot_magic_number >> (i * 4)) & 0xF]);
         }
+
+        printf("\n");
     }
 
-    void putAt(char c, size_t x, size_t y) {
-        const size_t idx = y * kWidth + x;
-        buffer_[idx] = entry(c, color_);
-    }
+    printf("Initializing system components...\n");
 
-    static uint8_t entryColor(Color fg, Color bg) {
-        return static_cast<uint8_t>(fg) | (static_cast<uint8_t>(bg) << 4);
-    }
+    printf("• Setting up GDT... ");
+    GlobalDescriptorTable gdt;
+    printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
+    
+    printf("• Setting up interrupts... ");
+    InterruptManager interrupts(0x20, &gdt);
+    printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
+    
+    printf("• Setting up keyboard... ");
+    KeyboardDriver keyboard(&interrupts);
+    printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
+    
+    printf("• Activating interrupts... ");
+    interrupts.activate();
+    printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
+    
+    printf("\n");
+    printf_colored("System initialized successfully!\n", VGA_COLOR_GREEN_ON_BLACK);
+    printf("Hardware cursor is visible and responsive.\n");
+    printf("Type anything - use backspace to delete.\n");
+    printf("Function keys (F1-F5) show debug messages and utilities.\n");
+    printf("Press F5 to clear screen. Have fun!\n");
 
-    static uint16_t entry(char c, uint8_t color) {
-        return static_cast<uint16_t>(c) | (static_cast<uint16_t>(color) << 8);
-    }
-
-    static size_t strlen(const char* s) {
-		const char* p = s;
-		while (*p) {
-			++p;
-		}
-		return p - s;
-	}
-};
-
-extern "C" void kernelMain() {
-    Terminal terminal;
-    terminal.init();
-    terminal.writeStr("Hello, World!\n:D");
-    terminal.writeStr("Type, I echo:\n");
-    extern char get_key();
-    while (true) {
-        char c = get_key();
-        if (c) {
-            if (c == '\b') {
-                terminal.deleteChar();
-            } else {
-                terminal.putChar(c);
-            }
-        }
+    while(1) {
+        // To save power, we can halt until we receive the next interrupt.
+        __asm__ volatile("hlt");
     }
 }
