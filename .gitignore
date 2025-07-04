@@ -3,7 +3,7 @@
 
 # Build artifacts
 build/
-isodir/
+iso_dir/
 *.iso
 *.bin
 
