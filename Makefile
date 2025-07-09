@@ -142,7 +142,7 @@ iso: $(BUILD_DIR)/os.iso
 # QEMU treats os.iso as if it's a physical CD-ROM inserted into a virtual computer.
 run: iso
 	qemu-system-i386 -cdrom $(BUILD_DIR)/os.iso \
-		-curses
+		-display curses
 
 clean:
 	rm -rf $(BUILD_DIR) iso_dir
