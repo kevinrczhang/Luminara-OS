@@ -88,13 +88,13 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
     printf("• Activating interrupts... ");
     interrupts.activate();
     printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
-    initialize_terminal();
     printf("\n");
     printf_colored("System initialized successfully!\n", VGA_COLOR_GREEN_ON_BLACK);
     printf("Hardware cursor is visible and responsive.\n");
     printf("Type anything - use backspace to delete.\n");
     printf("Function keys (F1-F5) show debug messages and utilities.\n");
     printf("Press F5 to clear screen. Have fun!\n");
+    initialize_terminal();
 
     while(1) {
         // To save power, we can halt until we receive the next interrupt.
