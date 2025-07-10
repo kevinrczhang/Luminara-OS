@@ -44,8 +44,6 @@ void print_donkey_ascii()
  */
 extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_magic_number)
 {
-    // We initialize the terminal first so we can display output.
-    initialize_terminal();
     
     // Print the donkey ASCII art first! (I eventually want to make the screen bigger).
     print_donkey_ascii();
@@ -90,7 +88,7 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
     printf("• Activating interrupts... ");
     interrupts.activate();
     printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
-    
+    initialize_terminal();
     printf("\n");
     printf_colored("System initialized successfully!\n", VGA_COLOR_GREEN_ON_BLACK);
     printf("Hardware cursor is visible and responsive.\n");
