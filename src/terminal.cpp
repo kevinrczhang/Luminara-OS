@@ -21,18 +21,25 @@ void initialize_terminal()
     clear_screen();
 }
 
-// Currently the cursor is still messed up but Kevin told me to push.
 void update_hardware_cursor()
 {
     uint16_t cursor_position = cursor_y * VGA_SCREEN_WIDTH + cursor_x;
     
+    // Enable cursor (cursor start register)
+    cursor_command_port.write(0x0A);
+    cursor_data_port.write(0x00);  // Cursor start line (0-15)
+    
+    // Set cursor end (cursor end register)
+    cursor_command_port.write(0x0B);
+    cursor_data_port.write(0x0F);  // Cursor end line (0-15)
+    
+    // Send low byte of cursor position
+    cursor_command_port.write(VGA_CURSOR_LOCATION_LOW);
+    cursor_data_port.write(cursor_position & 0xFF);
+    
     // Send high byte of cursor position
     cursor_command_port.write(VGA_CURSOR_LOCATION_HIGH);
     cursor_data_port.write((cursor_position >> 8) & 0xFF);
-    
-    // Send low byte of cursor position  
-    cursor_command_port.write(VGA_CURSOR_LOCATION_LOW);
-    cursor_data_port.write(cursor_position & 0xFF);
 }
 
 void clear_screen()
