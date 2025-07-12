@@ -20,11 +20,9 @@ void initialize_terminal()
 
 static inline void write_cursor_register(uint8_t reg, uint8_t value)
 {
-    // Can't figure out whats wrong with the ports so sticking with asm for now
-    // Maybe it's the virtual function call overhead?
-    // We can test this by making non virtual port methods.
-    __asm__ volatile("outb %0, %1" : : "a" (reg), "Nd" ((uint16_t)0x3D4));
-    __asm__ volatile("outb %0, %1" : : "a" (value), "Nd" ((uint16_t)0x3D5));
+    // Using non-virtual port methods to eliminate function call overhead
+    cursor_command_port.write_direct(reg);
+    cursor_data_port.write_direct(value);
 }
 
 void update_hardware_cursor()

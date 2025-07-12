@@ -21,6 +21,17 @@ public:
 
     virtual uint8_t read();
     virtual void write(uint8_t data);
+    
+    // Non-virtual methods for direct port access (no function call overhead)
+    inline uint8_t read_direct()
+    {
+        return read_8(port_number);
+    }
+    
+    inline void write_direct(uint8_t data)
+    {
+        write_8(port_number, data);
+    }
 
 protected:
     static inline uint8_t read_8(uint16_t port)
