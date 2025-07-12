@@ -21,18 +21,21 @@ void initialize_terminal()
     clear_screen();
 }
 
-// Currently the cursor is still messed up but Kevin told me to push.
+static inline void write_cursor_register(uint8_t reg, uint8_t value)
+{
+    // Can't figure out whats wrong with the ports so sticking with asm for now
+    // Maybe it's the virtual function call overhead?
+    // We can test this by making non virtual port methods.
+    __asm__ volatile("outb %0, %1" : : "a" (reg), "Nd" ((uint16_t)0x3D4));
+    __asm__ volatile("outb %0, %1" : : "a" (value), "Nd" ((uint16_t)0x3D5));
+}
+
 void update_hardware_cursor()
 {
     uint16_t cursor_position = cursor_y * VGA_SCREEN_WIDTH + cursor_x;
     
-    // Send high byte of cursor position
-    cursor_command_port.write(VGA_CURSOR_LOCATION_HIGH);
-    cursor_data_port.write((cursor_position >> 8) & 0xFF);
-    
-    // Send low byte of cursor position  
-    cursor_command_port.write(VGA_CURSOR_LOCATION_LOW);
-    cursor_data_port.write(cursor_position & 0xFF);
+    write_cursor_register(0x0F, cursor_position & 0xFF);
+    write_cursor_register(0x0E, (cursor_position >> 8) & 0xFF);
 }
 
 void clear_screen()
