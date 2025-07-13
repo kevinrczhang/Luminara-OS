@@ -40,7 +40,6 @@ bool KeyboardDriver::should_capitalize(char c)
 {
     bool shift_effect = is_shift_pressed();
     
-    // If caps lock is on, we invert the shift effect.
     if (caps_lock_active && c >= 'a' && c <= 'z') {
         shift_effect = !shift_effect;
     }
@@ -50,12 +49,10 @@ bool KeyboardDriver::should_capitalize(char c)
 
 char KeyboardDriver::apply_shift(char c)
 {
-    // This handles all letters.
     if (c >= 'a' && c <= 'z' && should_capitalize(c)) {
         return c - 'a' + 'A';
     }
     
-    // This handles numbers and symbols with shift.
     if (is_shift_pressed()) {
         switch(c)
         {
@@ -90,7 +87,6 @@ void KeyboardDriver::handle_special_key(uint8_t scan_code)
 {
     switch(scan_code)
     {
-        // It's funny cuz I don't even have fn keys on my keyboard LOL.
         case Keyboard::KEY_F1:
             printf_colored("\n[F1] System Info: Simple OS v1.0\n", VGA_COLOR_YELLOW_ON_BLACK);
             break;
@@ -153,7 +149,6 @@ void KeyboardDriver::handle_extended_key(uint8_t scan_code)
             break;
             
         case Keyboard::KEY_HOME:
-            // Move the cursor to beginning of line
             {
                 uint8_t x, y;
                 get_cursor_position(&x, &y);
@@ -162,7 +157,6 @@ void KeyboardDriver::handle_extended_key(uint8_t scan_code)
             break;
             
         case Keyboard::KEY_END:
-            // Move the cursor to end of line (find last non-space character)
             {
                 uint8_t x, y;
                 get_cursor_position(&x, &y);
@@ -176,19 +170,16 @@ uint32_t KeyboardDriver::handle_interrupt(uint32_t esp)
 {
     uint8_t scan_code = data_port.read();
     
-    // Check first for extended key prefix.
     if (scan_code == Keyboard::EXTENDED_KEY_PREFIX) {
         extended_key_next = true;
         return esp;
     }
     
-    // Check if this is a key release (high bit set).
     bool key_released = (scan_code & Keyboard::KEY_RELEASED) != 0;
     if (key_released) {
         scan_code &= ~Keyboard::KEY_RELEASED;  // Remove release flag
     }
     
-    // Handle extended keys:
     if (extended_key_next) {
         extended_key_next = false;
         if (!key_released) {
@@ -197,7 +188,6 @@ uint32_t KeyboardDriver::handle_interrupt(uint32_t esp)
         return esp;
     }
     
-    // Handle modifier keys (both press and release):
     switch(scan_code)
     {
         case Keyboard::KEY_LEFT_SHIFT:
@@ -224,12 +214,10 @@ uint32_t KeyboardDriver::handle_interrupt(uint32_t esp)
             return esp;
     }
     
-    // Only handle key presses for regular keys (ignore the releases).
     if (key_released) {
          return esp;
     }
     
-    // Handle special keys:
     switch(scan_code)
     {
         case Keyboard::KEY_BACKSPACE:
@@ -252,7 +240,6 @@ uint32_t KeyboardDriver::handle_interrupt(uint32_t esp)
             printf_colored("\n[ESC pressed]\n", VGA_COLOR_LIGHT_GRAY_ON_BLACK);
             break;
             
-        // Function keys:
         case Keyboard::KEY_F1:
         case Keyboard::KEY_F2:
         case Keyboard::KEY_F3:
@@ -261,12 +248,10 @@ uint32_t KeyboardDriver::handle_interrupt(uint32_t esp)
             handle_special_key(scan_code);
             break;
 
-        // Regular character keys:
         default:
         {
             char character = 0;
             
-            // Map the scan codes to each character:
             switch(scan_code)
             {
                 // Number row
@@ -325,7 +310,6 @@ uint32_t KeyboardDriver::handle_interrupt(uint32_t esp)
                 case 0x35: character = '/'; break;
             }
             
-            // If we found a character, apply its modifiers and print it!
             if (character != 0) {
                 character = apply_shift(character);
                 put_char(character);

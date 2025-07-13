@@ -1,17 +1,14 @@
 #include "terminal.h"
 #include "port.h"
 
-// Static vars
-static uint8_t cursor_x = 0;
-static uint8_t cursor_y = 0;
-static uint16_t* video_memory = VGA_VIDEO_MEMORY;
-static uint8_t current_color = VGA_COLOR_WHITE_ON_BLACK;
+static uint8_t cursor_x { 0 };
+static uint8_t cursor_y { 0 };
+static uint16_t* video_memory { VGA_VIDEO_MEMORY };
+static uint8_t current_color { VGA_COLOR_WHITE_ON_BLACK };
 
-// VGA cursor control ports
 static Port8Bit cursor_command_port(VGA_CURSOR_COMMAND_PORT);
 static Port8Bit cursor_data_port(VGA_CURSOR_DATA_PORT);
 
-// Initialize the terminal with the cursors starting at (0, 0).
 void initialize_terminal()
 {
     cursor_x = 0;
@@ -32,7 +29,7 @@ static inline void write_cursor_register(uint8_t reg, uint8_t value)
 
 void update_hardware_cursor()
 {
-    uint16_t cursor_position = cursor_y * VGA_SCREEN_WIDTH + cursor_x;
+    uint16_t cursor_position { cursor_y * VGA_SCREEN_WIDTH + cursor_x };
     
     write_cursor_register(0x0F, cursor_position & 0xFF);
     write_cursor_register(0x0E, (cursor_position >> 8) & 0xFF);
@@ -108,24 +105,20 @@ void put_char_colored(char character, uint8_t color)
             break;
             
         case '\t':
-            // Tab: advance to next 4-character boundary
             cursor_x = (cursor_x + 4) & ~3;
             break;
             
         case '\r':
-            // Carriage return: move to beginning of line
             cursor_x = 0;
             break;
             
         case '\b':
-            // Backspace: move cursor back (but don't clear)
             if (cursor_x > 0) {
                 cursor_x--;
             }
             break;
             
         default:
-            // Regular character
             if (character >= ' ' && character <= '~')  {
                 video_memory[VGA_SCREEN_WIDTH * cursor_y + cursor_x] = (color << 8) | character;
                 cursor_x++;
@@ -133,13 +126,11 @@ void put_char_colored(char character, uint8_t color)
             break;
     }
 
-    //If cursor goes beyond the screen we set it back to 0.
     if (cursor_x >= VGA_SCREEN_WIDTH) {
         cursor_x = 0;
         cursor_y++;
     }
 
-    // If we go to far down we scroll.
     if (cursor_y >= VGA_SCREEN_HEIGHT) {
         scroll_screen();
     }
@@ -155,10 +146,8 @@ void put_char(char character)
 void handle_backspace()
 {
     if (cursor_x > 0) {
-        // Move cursor back within current line
         cursor_x--;
     } else if (cursor_y > 0) {
-        // Move to end of previous line (this is lowkey starting to feel like a LeetCode problem).
         cursor_y--;
         cursor_x = VGA_SCREEN_WIDTH - 1;
         
@@ -172,7 +161,6 @@ void handle_backspace()
         }
     }
     
-    // Clears the character at cursor position
     video_memory[VGA_SCREEN_WIDTH * cursor_y + cursor_x] = (current_color << 8) | ' ';
     
     update_hardware_cursor();

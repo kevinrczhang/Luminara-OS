@@ -76,7 +76,6 @@ public:
 
 // Assembly interface functions declared with C linkage to avoid name mangling :)
 extern "C" {
-    // Wrapper function called from assembly code.
     uint32_t handle_interrupt_wrapper(uint8_t interrupt, uint32_t esp);
     
     void interrupt_ignore();
