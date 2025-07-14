@@ -1,6 +1,7 @@
 #include "gdt.h"
 #include "interrupts.h"
 #include "keyboard.h"
+#include "mouse.h"
 #include "terminal.h"
 #include "types.h"
 
@@ -86,6 +87,11 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
     printf("• Setting up keyboard... ");
     KeyboardDriver keyboard(&interrupts);
     printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
+
+    // Can't run at the same time as the keyboard, we will need to fix this
+    // printf("• Setting up mouse... ");
+    // MouseDriver mouse(&interrupts);
+    // printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
     
     printf("• Activating interrupts... ");
     interrupts.activate();

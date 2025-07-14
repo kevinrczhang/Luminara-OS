@@ -72,6 +72,7 @@ CPP_OBJECTS := $(BUILD_DIR)/gdt.o \
 			   $(BUILD_DIR)/terminal.o \
                $(BUILD_DIR)/interrupts.o \
                $(BUILD_DIR)/keyboard.o \
+			   $(BUILD_DIR)/mouse.o \
                $(BUILD_DIR)/kernel.o
 
 # All object files
@@ -111,6 +112,9 @@ $(BUILD_DIR)/interrupts.o: $(SRC_DIR)/interrupts.cpp | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/keyboard.o: $(SRC_DIR)/keyboard.cpp | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/mouse.o: $(SRC_DIR)/mouse.cpp | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/kernel.o: $(SRC_DIR)/kernel.cpp | $(BUILD_DIR)
