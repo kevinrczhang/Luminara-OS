@@ -4,10 +4,11 @@
 #include "types.h"
 #include "interrupts.h"
 #include "port.h"
+#include "driver.h"
 
 // Honestly, I haven't tested that these all work, we will have to test them.
 // PS2 keyboard driver
-class KeyboardDriver : public InterruptHandler
+class KeyboardDriver : public Driver
 {
 private:
     Port8Bit data_port;     // 0x60 - Keyboard data port
@@ -32,7 +33,15 @@ public:
     KeyboardDriver(InterruptManager* manager);
     ~KeyboardDriver();
     
-    virtual uint32_t handle_interrupt(uint32_t esp);
+    // Driver interface implementation
+    virtual void initialize() override;
+    virtual void activate() override;
+    virtual void deactivate() override;
+    virtual void reset() override;
+    virtual const char* get_driver_name() override;
+    
+    // InterruptHandler interface implementation
+    virtual uint32_t handle_interrupt(uint32_t esp) override;
 };
 
 namespace Keyboard {

@@ -2,7 +2,7 @@
 #include "terminal.h"
 
 KeyboardDriver::KeyboardDriver(InterruptManager* manager)
-    : InterruptHandler(manager, 0x21), // Initialize as InterruptHandler for IRQ 1 (0x21 = hardware offset + 1).
+    : Driver(manager, 0x21), // Initialize as Driver for IRQ 1 (0x21 = hardware offset + 1).
       data_port(0x60),
       command_port(0x64),
       left_shift_pressed(false),
@@ -12,9 +12,19 @@ KeyboardDriver::KeyboardDriver(InterruptManager* manager)
       caps_lock_active(false),
       extended_key_next(false)
 {
-    // We check is the keyboard controller has data waiting (bit 0 status).
+    initialize();
+}
+
+KeyboardDriver::~KeyboardDriver()
+{
+    deactivate();
+}
+
+void KeyboardDriver::initialize()
+{
+    // We check if the keyboard controller has data waiting (bit 0 status).
     while(command_port.read() & 0x1) {
-        // If so, we read a discard the data to clear the buffer.
+        // If so, we read and discard the data to clear the buffer.
         data_port.read();
     }
     
@@ -26,9 +36,45 @@ KeyboardDriver::KeyboardDriver(InterruptManager* manager)
     data_port.write(0xf4);     // We send this directly to the keyboard to enable it.
 }
 
-KeyboardDriver::~KeyboardDriver()
+void KeyboardDriver::activate()
 {
+    // Reset any state variables
+    left_shift_pressed = false;
+    right_shift_pressed = false;
+    ctrl_pressed = false;
+    alt_pressed = false;
+    extended_key_next = false;
+    
+    // Re-enable keyboard
+    data_port.write(0xf4);
+}
 
+void KeyboardDriver::deactivate()
+{
+    // Disable keyboard
+    data_port.write(0xf5);
+}
+
+void KeyboardDriver::reset()
+{
+    // Reset keyboard state
+    left_shift_pressed = false;
+    right_shift_pressed = false;
+    ctrl_pressed = false;
+    alt_pressed = false;
+    caps_lock_active = false;
+    extended_key_next = false;
+    
+    // Send reset command to keyboard
+    data_port.write(0xff);
+    
+    // Re-initialize after reset
+    initialize();
+}
+
+const char* KeyboardDriver::get_driver_name()
+{
+    return "PS/2 Keyboard Driver";
 }
 
 bool KeyboardDriver::is_shift_pressed()

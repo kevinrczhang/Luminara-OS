@@ -1,14 +1,23 @@
 #include "mouse.h"
 
 MouseDriver::MouseDriver(InterruptManager* manager)
-    : InterruptHandler(manager, 0x2C), // Initialize as InterruptHandler for IRQ C (0x2C = hardware offset + C).
+    : Driver(manager, 0x2C), // Initialize as Driver for IRQ C (0x2C = hardware offset + C).
       data_port(0x60),
       command_port(0x64)
 {    
     offset = 0;
     buttons = 0;
+    initialize();
+}
 
-    uint16_t* video_memory { (uint16_t*)0xb8000 };
+MouseDriver::~MouseDriver()
+{
+    deactivate();
+}
+
+void MouseDriver::initialize()
+{
+    uint16_t* video_memory = (uint16_t*)0xb8000;
 
     video_memory[80 * 12 + 40] = ((video_memory[80 * 12 + 40] & 0xf000) >> 4)
         || ((video_memory[80 * 12 + 40] & 0x0f00) << 4)
@@ -25,9 +34,41 @@ MouseDriver::MouseDriver(InterruptManager* manager)
     data_port.read();
 }
 
-MouseDriver::~MouseDriver()
+void MouseDriver::activate()
 {
+    // Reset state
+    offset = 0;
+    buttons = 0;
+    
+    // Send enable command
+    command_port.write(0xd4);
+    data_port.write(0xf4);
+}
 
+void MouseDriver::deactivate()
+{
+    // Send disable command
+    command_port.write(0xd4);
+    data_port.write(0xf5);
+}
+
+void MouseDriver::reset()
+{
+    // Reset mouse state
+    offset = 0;
+    buttons = 0;
+    
+    // Send reset command
+    command_port.write(0xd4);
+    data_port.write(0xff);
+    
+    // Re-initialize after reset
+    initialize();
+}
+
+const char* MouseDriver::get_driver_name()
+{
+    return "PS/2 Mouse Driver";
 }
 
 uint32_t MouseDriver::handle_interrupt(uint32_t esp)
