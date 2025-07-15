@@ -38,7 +38,6 @@ void KeyboardDriver::initialize()
 
 void KeyboardDriver::activate()
 {
-    // Reset any state variables
     left_shift_pressed = false;
     right_shift_pressed = false;
     ctrl_pressed = false;
@@ -57,7 +56,6 @@ void KeyboardDriver::deactivate()
 
 void KeyboardDriver::reset()
 {
-    // Reset keyboard state
     left_shift_pressed = false;
     right_shift_pressed = false;
     ctrl_pressed = false;
@@ -68,7 +66,6 @@ void KeyboardDriver::reset()
     // Send reset command to keyboard
     data_port.write(0xff);
     
-    // Re-initialize after reset
     initialize();
 }
 
@@ -223,7 +220,7 @@ uint32_t KeyboardDriver::handle_interrupt(uint32_t esp)
     
     bool key_released = (scan_code & Keyboard::KEY_RELEASED) != 0;
     if (key_released) {
-        scan_code &= ~Keyboard::KEY_RELEASED;  // Remove release flag
+        scan_code &= ~Keyboard::KEY_RELEASED;
     }
     
     if (extended_key_next) {

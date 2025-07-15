@@ -33,7 +33,6 @@ public:
     KeyboardDriver(InterruptManager* manager);
     ~KeyboardDriver();
     
-    // Driver interface implementation
     virtual void initialize() override;
     virtual void activate() override;
     virtual void deactivate() override;
@@ -75,17 +74,17 @@ namespace Keyboard {
     
     // Extended keys (prefixed with 0xE0)
     const uint8_t EXTENDED_KEY_PREFIX = 0xE0;
-    const uint8_t KEY_RIGHT_CTRL    = 0x1D;  // After 0xE0
-    const uint8_t KEY_RIGHT_ALT     = 0x38;  // After 0xE0
-    const uint8_t KEY_DELETE        = 0x53;  // After 0xE0
-    const uint8_t KEY_HOME          = 0x47;  // After 0xE0
-    const uint8_t KEY_END           = 0x4F;  // After 0xE0
-    const uint8_t KEY_PAGE_UP       = 0x49;  // After 0xE0
-    const uint8_t KEY_PAGE_DOWN     = 0x51;  // After 0xE0
-    const uint8_t KEY_ARROW_UP      = 0x48;  // After 0xE0
-    const uint8_t KEY_ARROW_DOWN    = 0x50;  // After 0xE0
-    const uint8_t KEY_ARROW_LEFT    = 0x4B;  // After 0xE0
-    const uint8_t KEY_ARROW_RIGHT   = 0x4D;  // After 0xE0
+    const uint8_t KEY_RIGHT_CTRL    = 0x1D;
+    const uint8_t KEY_RIGHT_ALT     = 0x38;
+    const uint8_t KEY_DELETE        = 0x53;
+    const uint8_t KEY_HOME          = 0x47;
+    const uint8_t KEY_END           = 0x4F;
+    const uint8_t KEY_PAGE_UP       = 0x49;
+    const uint8_t KEY_PAGE_DOWN     = 0x51;
+    const uint8_t KEY_ARROW_UP      = 0x48;
+    const uint8_t KEY_ARROW_DOWN    = 0x50;
+    const uint8_t KEY_ARROW_LEFT    = 0x4B;
+    const uint8_t KEY_ARROW_RIGHT   = 0x4D;
     
     // Key state flags
     const uint8_t KEY_RELEASED      = 0x80;  // OR'd with scan code for key release

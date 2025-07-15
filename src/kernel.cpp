@@ -5,12 +5,10 @@
 #include "terminal.h"
 #include "types.h"
 
-// This defines a function pointer type for constructors.
 typedef void (*constructor)();
 extern "C" constructor start_ctors;
 extern "C" constructor end_ctors;
 
-// We want to call all the global constructors we defined before main.
 extern "C" void call_constructors()
 {
     for (constructor* i = &start_ctors; i != &end_ctors; ++i) {
@@ -37,20 +35,10 @@ void print_donkey_ascii()
     printf_colored("########################################\n", VGA_COLOR_YELLOW_ON_BLACK);
 }
 
-/**
- * The main kernel entry point
- * 
- * This is where the kernel starts execution after being loaded by the bootloader.
- * It initializes all system components and then enters into an infinite loop.
- */
 extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_magic_number)
 {
-    // We initialize the terminal first so we can display output.
     initialize_terminal();
-    
-    // Print the donkey ASCII art first! (I eventually want to make the screen bigger).
     print_donkey_ascii();
-    
     printf_colored("=== Donkey OS Kernel ===\n", VGA_COLOR_YELLOW_ON_BLACK);
     
     /**
@@ -64,7 +52,6 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
         printf_colored("✗ ERROR: Invalid multiboot magic number!\n", VGA_COLOR_RED_ON_BLACK);
         printf("Expected: 0x2badb002, Got: 0x");
         
-        // This is to display the magic number we got in hex.
         char hex_digits[] = "0123456789ABCDEF";
 
         for (int i = 7; i >= 0; --i) {

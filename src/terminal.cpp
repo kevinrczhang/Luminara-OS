@@ -20,9 +20,13 @@ void initialize_terminal()
 
 static inline void write_cursor_register(uint8_t reg, uint8_t value)
 {
+    __asm__ volatile("outb %0, %1" : : "a" (reg), "Nd" ((uint16_t)0x3D4));
+    __asm__ volatile("outb %0, %1" : : "a" (value), "Nd" ((uint16_t)0x3D5));
     // Using non-virtual port methods to eliminate function call overhead
-    cursor_command_port.write_direct(reg);
-    cursor_data_port.write_direct(value);
+    // cursor_command_port.write_direct(reg);
+    // cursor_data_port.write_direct(value);
+
+    // Your functions don't work for me kevin :(
 }
 
 void update_hardware_cursor()
