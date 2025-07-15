@@ -65,7 +65,7 @@ GlobalDescriptorTable::SegmentDescriptor::SegmentDescriptor(uint32_t base_addres
 
 uint32_t GlobalDescriptorTable::SegmentDescriptor::get_base_address()
 {
-    uint32_t base_address = base_bits_24_31;
+    uint32_t base_address = { base_bits_24_31 };
     base_address = (base_address << 8) + base_bits_16_23;
     base_address = (base_address << 16) + base_bits_0_15;
 
@@ -74,11 +74,10 @@ uint32_t GlobalDescriptorTable::SegmentDescriptor::get_base_address()
 
 uint32_t GlobalDescriptorTable::SegmentDescriptor::get_limit()
 {
-    uint32_t limit = limit_bits_16_19_and_flags & 0x0F;
+    uint32_t limit = { limit_bits_16_19_and_flags & 0x0F };
     limit = (limit << 16) + limit_bits_0_15;
 
-    bool page_granularity = (limit_bits_16_19_and_flags & GDT::FLAG_GRANULARITY_4KB) != 0;
-    
+    bool page_granularity = { (limit_bits_16_19_and_flags & GDT::FLAG_GRANULARITY_4KB) != 0 };
     if (page_granularity) {
         // Convert from pages back to bytes and add the page offset
         limit = (limit << 12) | 0xFFF;

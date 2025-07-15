@@ -81,7 +81,7 @@ bool KeyboardDriver::is_shift_pressed()
 
 bool KeyboardDriver::should_capitalize(char c)
 {
-    bool shift_effect = is_shift_pressed();
+    bool shift_effect { is_shift_pressed() };
     
     if (caps_lock_active && c >= 'a' && c <= 'z') {
         shift_effect = !shift_effect;
@@ -211,14 +211,14 @@ void KeyboardDriver::handle_extended_key(uint8_t scan_code)
 
 uint32_t KeyboardDriver::handle_interrupt(uint32_t esp)
 {
-    uint8_t scan_code = data_port.read();
+    uint8_t scan_code { data_port.read() };
     
     if (scan_code == Keyboard::EXTENDED_KEY_PREFIX) {
         extended_key_next = true;
         return esp;
     }
     
-    bool key_released = (scan_code & Keyboard::KEY_RELEASED) != 0;
+    bool key_released { (scan_code & Keyboard::KEY_RELEASED) != 0 };
     if (key_released) {
         scan_code &= ~Keyboard::KEY_RELEASED;
     }
@@ -293,7 +293,7 @@ uint32_t KeyboardDriver::handle_interrupt(uint32_t esp)
 
         default:
         {
-            char character = 0;
+            char character = { 0 };
             
             switch(scan_code)
             {
@@ -359,7 +359,7 @@ uint32_t KeyboardDriver::handle_interrupt(uint32_t esp)
             } else {
                 // Show debug info for unhandled keys.
                 printf_colored("[Key:0x", VGA_COLOR_LIGHT_GRAY_ON_BLACK);
-                char hex_digits[] = "0123456789ABCDEF";
+                char hex_digits[] { "0123456789ABCDEF" };
                 put_char(hex_digits[(scan_code >> 4) & 0xF]);
                 put_char(hex_digits[scan_code & 0xF]);
                 printf_colored("] ", VGA_COLOR_LIGHT_GRAY_ON_BLACK);

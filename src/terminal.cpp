@@ -155,7 +155,7 @@ void handle_backspace()
         
         // Find the actual end of text on previous line.
         while (cursor_x > 0) {
-            uint16_t cell = video_memory[VGA_SCREEN_WIDTH * cursor_y + cursor_x];
+            uint16_t cell { video_memory[VGA_SCREEN_WIDTH * cursor_y + cursor_x] };
             if ((cell & 0xFF) != ' ') {
                 break;
             }

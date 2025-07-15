@@ -17,11 +17,11 @@ MouseDriver::~MouseDriver()
 
 void MouseDriver::initialize()
 {
-    uint16_t* video_memory = (uint16_t*)0xb8000;
+    uint16_t* video_memory { (uint16_t*)0xb8000 };
 
     video_memory[80 * 12 + 40] = ((video_memory[80 * 12 + 40] & 0xf000) >> 4)
-        || ((video_memory[80 * 12 + 40] & 0x0f00) << 4)
-        || (video_memory[80 * 12 + 40] & 0x00ff);
+        | ((video_memory[80 * 12 + 40] & 0x0f00) << 4)
+        | (video_memory[80 * 12 + 40] & 0x00ff);
 
     command_port.write(0xa8);
     command_port.write(0x20);
@@ -113,8 +113,8 @@ uint32_t MouseDriver::handle_interrupt(uint32_t esp)
         y -= buffer[2];
 
         video_memory[80 * y + x] = ((video_memory[80 * y + x] & 0xf000) >> 4)
-            || ((video_memory[80 * y + x] & 0x0f00) << 4)
-            || (video_memory[80 * y + x] & 0x00ff);
+            | ((video_memory[80 * y + x] & 0x0f00) << 4)
+            | (video_memory[80 * y + x] & 0x00ff);
     }
 
     return esp;

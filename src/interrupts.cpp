@@ -28,7 +28,7 @@ uint32_t InterruptHandler::handle_interrupt(uint32_t esp)
 }
 
 InterruptManager::GateDescriptor InterruptManager::interrupt_descriptor_table[256];
-InterruptManager* InterruptManager::active_interrupt_manager = 0;
+InterruptManager* InterruptManager::active_interrupt_manager = { 0 };
 
 void InterruptManager::set_interrupt_descriptor_table_entry(uint8_t interrupt,
     uint16_t code_segment, void (*handler)(), uint8_t descriptor_privilege_level, uint8_t descriptor_type)
@@ -37,7 +37,7 @@ void InterruptManager::set_interrupt_descriptor_table_entry(uint8_t interrupt,
     interrupt_descriptor_table[interrupt].handler_address_high_bits = (((uint32_t) handler) >> 16) & 0xFFFF;
     interrupt_descriptor_table[interrupt].gdt_code_segment_selector = code_segment;
 
-    const uint8_t IDT_DESC_PRESENT = 0x80;
+    const uint8_t IDT_DESC_PRESENT { 0x80 };
     interrupt_descriptor_table[interrupt].access = IDT_DESC_PRESENT | ((descriptor_privilege_level & 3) << 5) | descriptor_type;
     interrupt_descriptor_table[interrupt].reserved = 0; // Clear the reserved field.
 }
@@ -50,9 +50,9 @@ InterruptManager::InterruptManager(uint16_t hardware_interrupt_offset, GlobalDes
       pic_slave_data_port(0xA1)
 {
     this->hardware_interrupt_offset_value = hardware_interrupt_offset;
-    uint32_t code_segment = global_descriptor_table->get_code_segment_selector();
+    uint32_t code_segment = { global_descriptor_table->get_code_segment_selector() };
 
-    const uint8_t IDT_INTERRUPT_GATE = 0xE;
+    const uint8_t IDT_INTERRUPT_GATE { 0xE };
     
     // Initialize all entries to ignore handler by default.
     for (uint8_t i = 255; i > 0; --i) {
