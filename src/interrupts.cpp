@@ -1,7 +1,6 @@
 #include "interrupts.h"
 #include "terminal.h"
 
-// C wrapper function called from assembly
 extern "C" uint32_t handle_interrupt_wrapper(uint8_t interrupt, uint32_t esp)
 {
     return InterruptManager::handle_interrupt(interrupt, esp);
@@ -21,7 +20,6 @@ InterruptHandler::~InterruptHandler()
     }
 }
 
-// This method is virtual so we just return the stack pointer (essentially a no-op).
 uint32_t InterruptHandler::handle_interrupt(uint32_t esp)
 {
     return esp;
@@ -50,7 +48,7 @@ InterruptManager::InterruptManager(uint16_t hardware_interrupt_offset, GlobalDes
       pic_slave_data_port(0xA1)
 {
     this->hardware_interrupt_offset_value = hardware_interrupt_offset;
-    uint32_t code_segment = { global_descriptor_table->get_code_segment_selector() };
+    uint32_t code_segment { global_descriptor_table->get_code_segment_selector() };
 
     const uint8_t IDT_INTERRUPT_GATE { 0xE };
     
@@ -170,8 +168,8 @@ uint32_t InterruptManager::do_handle_interrupt(uint8_t interrupt, uint32_t esp)
     if (handlers[interrupt] != 0) {
         esp = handlers[interrupt]->handle_interrupt(esp);
     } else if (interrupt != hardware_interrupt_offset_value) {
-        char error_msg[] = "UNHANDLED INTERRUPT 0x00";
-        char hex_digits[] = "0123456789ABCDEF";
+        char error_msg[] { "UNHANDLED INTERRUPT 0x00" };
+        char hex_digits[] { "0123456789ABCDEF" };
         error_msg[22] = hex_digits[(interrupt >> 4) & 0xF];
         error_msg[23] = hex_digits[interrupt & 0xF];
         printf(error_msg);

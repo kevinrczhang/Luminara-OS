@@ -52,7 +52,7 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
         printf_colored("✗ ERROR: Invalid multiboot magic number!\n", VGA_COLOR_RED_ON_BLACK);
         printf("Expected: 0x2badb002, Got: 0x");
         
-        char hex_digits[] = "0123456789ABCDEF";
+        char hex_digits[] { "0123456789ABCDEF" };
 
         for (int i = 7; i >= 0; --i) {
             put_char(hex_digits[(multiboot_magic_number >> (i * 4)) & 0xF]);

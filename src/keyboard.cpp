@@ -30,7 +30,7 @@ void KeyboardDriver::initialize()
     
     command_port.write(0xae);  // This command enables interrupts.
     command_port.write(0x20);  // This command gets the current controller configuration.
-    uint8_t status = (data_port.read() | 1) & ~0x10; // Enable interrupts (bit 0), and disable mouse (clear bit 4).
+    uint8_t status { (data_port.read() | 1) & ~0x10 }; // Enable interrupts (bit 0), and disable mouse (clear bit 4).
     command_port.write(0x60);  // This command writes the new configuration.
     data_port.write(status);   // We write the modified configuration byte.
     data_port.write(0xf4);     // We send this directly to the keyboard to enable it.
