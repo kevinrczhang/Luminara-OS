@@ -30,3 +30,19 @@ All guest dependencies are automatically provisioned by the Vagrantfile.
    cd /osdev
    make run
    ```
+
+## Features
+- Print "Hello World!" (Complete)
+- GDT (Complete)
+- IDT (Complete)
+- Drivers (WIP)
+   - Keyboard Input (Complete)
+   - Mouse Input (WIP)
+   - Driver Management (WIP)
+- PCI (Not started)
+- Paging (Not started)
+- Graphics (Not started)
+- Task Scheduling (Not started)
+- Memory Management (Not started)
+- Networking (Not started)
+- Custom Bootloader (Not started)
