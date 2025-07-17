@@ -39,7 +39,7 @@ All guest dependencies are automatically provisioned by the Vagrantfile.
    - Keyboard Input (Complete)
    - Mouse Input (WIP)
    - Driver Management (WIP)
-- PCI (Not started)
+- PCI (WIP)
 - Paging (Not started)
 - Graphics (Not started)
 - Task Scheduling (Not started)
