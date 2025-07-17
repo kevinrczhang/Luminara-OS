@@ -168,12 +168,63 @@ void handle_backspace()
     update_hardware_cursor();
 }
 
+void int_to_string(int value, char* buffer)
+{
+    if (value == 0) {
+        buffer[0] = '0';
+        buffer[1] = '\0';
+        return;
+    }
+
+    bool is_negative = false;
+    if (value < 0) {
+        is_negative = true;
+        value = -value;
+    }
+
+    char temp[12]; // enough for 32-bit int including minus sign
+    int i = 0;
+
+    while (value > 0) {
+        temp[i++] = '0' + (value % 10);
+        value /= 10;
+    }
+
+    int j = 0;
+    if (is_negative) {
+        buffer[j++] = '-';
+    }
+
+    while (i > 0) {
+        buffer[j++] = temp[--i];
+    }
+
+    buffer[j] = '\0';
+}
+
 // We will move this to a std directory.
 void printf(const char* str)
 {
     for (int i = 0; str[i] != '\0'; ++i) {
         put_char(str[i]);
     }
+}
+
+void printf_int(int value) {
+    char buffer[16];
+    int_to_string(value, buffer);
+    printf(buffer);
+}
+
+void printf_hex16(uint16_t value) {
+    char buffer[7];
+    const char* hex = "0123456789ABCDEF";
+    buffer[0] = hex[(value >> 12) & 0xF];
+    buffer[1] = hex[(value >> 8)  & 0xF];
+    buffer[2] = hex[(value >> 4)  & 0xF];
+    buffer[3] = hex[value & 0xF];
+    buffer[4] = '\0'; // No "0x" prefix; you can choose to add it
+    printf(buffer);
 }
 
 void printf_colored(const char* str, uint8_t color)

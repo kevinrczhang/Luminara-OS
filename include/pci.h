@@ -2,10 +2,14 @@
 #define PCI_H
 
 #include "port.h"
+#include "terminal.h"
 
 class PeripheralComponentInterconnectDeviceDescriptor
 {
     public:
+        uint32_t port;
+        uint32_t interrupt_number;
+
         uint16_t bus_number;
         uint16_t device_number;
         uint16_t function_number;
@@ -36,6 +40,7 @@ class PeripheralComponentInterconnectController
         void write(uint16_t bus_number, uint16_t device_number, uint16_t function_number, uint32_t register_offset, uint32_t value);
         bool device_has_functions(uint16_t bus_number, uint16_t device_number);
         
+        void select_drivers(); // We will add the drivers in the param we pass to this function.
         PeripheralComponentInterconnectDeviceDescriptor get_device_descriptor(uint16_t bus_number, uint16_t device_number, uint16_t function_number);
 };
 

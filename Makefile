@@ -72,6 +72,7 @@ CPP_OBJECTS := $(BUILD_DIR)/gdt.o \
                $(BUILD_DIR)/driver.o \
 			   $(BUILD_DIR)/terminal.o \
                $(BUILD_DIR)/interrupts.o \
+			   $(BUILD_DIR)/pci.o \
                $(BUILD_DIR)/keyboard.o \
 			   $(BUILD_DIR)/mouse.o \
                $(BUILD_DIR)/kernel.o
@@ -83,7 +84,6 @@ ALL_OBJECTS := $(ASM_OBJECTS) $(CPP_OBJECTS)
 # Phony Targets
 # =============================================================================
 
-# Tell Make that these aren't real files, just commands hehe.
 .PHONY: all iso run clean
 
 # =============================================================================
@@ -115,6 +115,9 @@ $(BUILD_DIR)/terminal.o: $(SRC_DIR)/terminal.cpp | $(BUILD_DIR)
 $(BUILD_DIR)/interrupts.o: $(SRC_DIR)/interrupts.cpp | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+$(BUILD_DIR)/pci.o: $(SRC_DIR)/pci.cpp | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
 $(BUILD_DIR)/keyboard.o: $(SRC_DIR)/keyboard.cpp | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
@@ -143,11 +146,8 @@ $(BUILD_DIR)/os.iso: $(BUILD_DIR)/kernel.bin grub.cfg | $(BUILD_DIR)
 # Convenience Targets
 # =============================================================================
 
-# Build the ISO image.
 iso: $(BUILD_DIR)/os.iso
 
-# Run the OS using the QEMU emulator.
-# QEMU treats os.iso as if it's a physical CD-ROM inserted into a virtual computer.
 run: iso
 	qemu-system-i386 -cdrom $(BUILD_DIR)/os.iso \
 		-display curses
@@ -155,6 +155,5 @@ run: iso
 clean:
 	rm -rf $(BUILD_DIR) iso_dir
 
-# Create the build directory.
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)

@@ -2,6 +2,7 @@
 #include "interrupts.h"
 #include "keyboard.h"
 #include "mouse.h"
+#include "pci.h"
 #include "terminal.h"
 #include "types.h"
 
@@ -79,6 +80,9 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
     // printf("• Setting up mouse... ");
     // MouseDriver mouse(&interrupts);
     // printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
+
+    PeripheralComponentInterconnectController PCIController;
+    PCIController.select_drivers();
     
     printf("• Activating interrupts... ");
     interrupts.activate();
@@ -86,10 +90,10 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
     
     printf("\n");
     printf_colored("System initialized successfully!\n", VGA_COLOR_GREEN_ON_BLACK);
-    printf("Hardware cursor is visible and responsive.\n");
-    printf("Type anything - use backspace to delete.\n");
-    printf("Function keys (F1-F5) show debug messages and utilities.\n");
-    printf("Press F5 to clear screen. Have fun!\n");
+    // printf("Hardware cursor is visible and responsive.\n");
+    // printf("Type anything - use backspace to delete.\n");
+    // printf("Function keys (F1-F5) show debug messages and utilities.\n");
+    // printf("Press F5 to clear screen. Have fun!\n");
 
     while(1) {
         // To save power, we can halt until we receive the next interrupt.

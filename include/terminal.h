@@ -53,6 +53,10 @@
 #define VGA_COLOR_CYAN VGA_COLOR_CYAN_ON_BLACK
 #define VGA_COLOR_MAGENTA VGA_COLOR_MAGENTA_ON_BLACK
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void initialize_terminal();
 void clear_screen();
 void scroll_screen();
@@ -64,11 +68,17 @@ void set_cursor_position(uint8_t x, uint8_t y);
 void put_char(char character);
 void put_char_colored(char character, uint8_t color);
 void printf(const char* str);
+void printf_int(int value);
+void printf_hex16(uint16_t value);
 void printf_colored(const char* str, uint8_t color);
 
 void handle_backspace();
 
 void set_text_color(uint8_t color);
 uint8_t get_text_color();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
