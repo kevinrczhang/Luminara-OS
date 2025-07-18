@@ -1,8 +1,25 @@
 #ifndef PCI_H
 #define PCI_H
 
+#include "driver_manager.h"
+#include "interrupts.h"
 #include "port.h"
 #include "terminal.h"
+
+enum class BaseAddressRegisterType
+{
+    MemoryMapping = 0,
+    InputOutput = 1
+};
+
+class BaseAddressRegister
+{
+    public:
+        bool fetchable_bit;
+        uint8_t* address;
+        uint32_t size;
+        BaseAddressRegisterType type;
+};
 
 class PeripheralComponentInterconnectDeviceDescriptor
 {
@@ -40,8 +57,10 @@ class PeripheralComponentInterconnectController
         void write(uint16_t bus_number, uint16_t device_number, uint16_t function_number, uint32_t register_offset, uint32_t value);
         bool device_has_functions(uint16_t bus_number, uint16_t device_number);
         
-        void select_drivers(); // We will add the drivers in the param we pass to this function.
+        void select_drivers(DriverManager* driver_manager, InterruptManager* interrupts);
+        Driver* get_driver(PeripheralComponentInterconnectDeviceDescriptor device, InterruptManager* interrupts);
         PeripheralComponentInterconnectDeviceDescriptor get_device_descriptor(uint16_t bus_number, uint16_t device_number, uint16_t function_number);
+        BaseAddressRegister get_base_address_register(uint16_t bus_number, uint16_t device_number, uint16_t function_number, uint16_t base_address_register);
 };
 
 #endif
