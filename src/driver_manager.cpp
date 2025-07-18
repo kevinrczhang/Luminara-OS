@@ -4,8 +4,7 @@
 DriverManager::DriverManager()
     : driver_count(0), is_active(false)
 {
-    // Initialize all driver pointers to null
-    for (int i = 0; i < MAX_DRIVERS; i++) {
+    for (int i = 0; i < MAX_DRIVERS; ++i) {
         drivers[i] = nullptr;
     }
 }
@@ -21,7 +20,7 @@ int DriverManager::find_driver_index(Driver* driver)
         return -1;
     }
     
-    for (int i = 0; i < driver_count; i++) {
+    for (int i = 0; i < driver_count; ++i) {
         if (drivers[i] == driver) {
             return i;
         }
@@ -43,7 +42,6 @@ bool DriverManager::register_driver(Driver* driver)
         return false;
     }
     
-    // Check if driver is already registered
     if (find_driver_index(driver) != -1) {
         printf_colored("WARNING: Driver already registered\n", VGA_COLOR_YELLOW_ON_BLACK);
         return false;
@@ -62,7 +60,7 @@ bool DriverManager::register_driver(Driver* driver)
 
 bool DriverManager::unregister_driver(Driver* driver)
 {
-    int index = find_driver_index(driver);
+    int index { find_driver_index(driver) };
     if (index == -1) {
         printf_colored("ERROR: Driver not found for unregistration\n", VGA_COLOR_RED_ON_BLACK);
         return false;

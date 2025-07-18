@@ -6,7 +6,7 @@
 #include "port.h"
 #include "terminal.h"
 
-enum class BaseAddressRegisterType
+enum BaseAddressRegisterType
 {
     MemoryMapping = 0,
     InputOutput = 1
@@ -15,7 +15,7 @@ enum class BaseAddressRegisterType
 class BaseAddressRegister
 {
     public:
-        bool fetchable_bit;
+        bool prefetchable_bit;
         uint8_t* address;
         uint32_t size;
         BaseAddressRegisterType type;
@@ -57,8 +57,8 @@ class PeripheralComponentInterconnectController
         void write(uint16_t bus_number, uint16_t device_number, uint16_t function_number, uint32_t register_offset, uint32_t value);
         bool device_has_functions(uint16_t bus_number, uint16_t device_number);
         
-        void select_drivers(DriverManager* driver_manager, InterruptManager* interrupts);
-        Driver* get_driver(PeripheralComponentInterconnectDeviceDescriptor device, InterruptManager* interrupts);
+        void select_drivers(DriverManager* driver_manager, InterruptManager* interrupt_manager);
+        Driver* get_driver(PeripheralComponentInterconnectDeviceDescriptor device, InterruptManager* interrupt_manager);
         PeripheralComponentInterconnectDeviceDescriptor get_device_descriptor(uint16_t bus_number, uint16_t device_number, uint16_t function_number);
         BaseAddressRegister get_base_address_register(uint16_t bus_number, uint16_t device_number, uint16_t function_number, uint16_t base_address_register);
 };

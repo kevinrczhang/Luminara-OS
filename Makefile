@@ -152,9 +152,19 @@ $(BUILD_DIR)/os.iso: $(BUILD_DIR)/kernel.bin grub.cfg | $(BUILD_DIR)
 
 iso: $(BUILD_DIR)/os.iso
 
+# Run with AM79C973 (AMD PCnet-PCI II) Ethernet controller (you should see it in the PCI)
 run: iso
 	qemu-system-i386 -cdrom $(BUILD_DIR)/os.iso \
-		-display curses
+		-display curses \
+		-netdev user,id=net0 \
+		-device pcnet,netdev=net0
+
+# Alternative: Run with Intel E1000 (this was the original setup if the top one doesn't work)
+run-e1000: iso
+	qemu-system-i386 -cdrom $(BUILD_DIR)/os.iso \
+		-display curses \
+		-netdev user,id=net0 \
+		-device e1000,netdev=net0
 
 clean:
 	rm -rf $(BUILD_DIR) iso_dir

@@ -70,7 +70,7 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
     printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
     
     printf("• Setting up interrupts... ");
-    InterruptManager interrupts(0x20, &gdt);
+    InterruptManager interrupt_manager(0x20, &gdt);
     printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
     
     printf("• Setting up driver manager... ");
@@ -78,7 +78,7 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
     printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
     
     printf("• Registering keyboard driver... ");
-    KeyboardDriver keyboard(&interrupts);
+    KeyboardDriver keyboard(&interrupt_manager);
     driver_manager.register_driver(&keyboard);
     printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
 
@@ -89,7 +89,7 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
     // printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
 
     PeripheralComponentInterconnectController PCIController;
-    PCIController.select_drivers();
+    PCIController.select_drivers(&driver_manager, &interrupt_manager);
     
     printf("• Initializing all drivers... ");
     driver_manager.initialize_all_drivers();
@@ -97,17 +97,17 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
     printf("• Activating all drivers... ");
     driver_manager.activate_all_drivers();
     
-    printf("• Activating interrupts... ");
-    interrupts.activate();
-    printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
+    // printf("• Activating interrupts... ");
+    // interrupt_manager.activate();
+    // printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
     
-    printf("\n");
-    printf_colored("System initialized successfully!\n", VGA_COLOR_GREEN_ON_BLACK);
-    driver_manager.print_driver_status();
-    printf("Hardware cursor is visible and responsive.\n");
-    printf("Type anything - use backspace to delete.\n");
-    printf("Function keys (F1-F5) show debug messages and utilities.\n");
-    printf("Press F5 to clear screen. Have fun!\n");
+    // printf("\n");
+    // printf_colored("System initialized successfully!\n", VGA_COLOR_GREEN_ON_BLACK);
+    // driver_manager.print_driver_status();
+    // printf("Hardware cursor is visible and responsive.\n");
+    // printf("Type anything - use backspace to delete.\n");
+    // printf("Function keys (F1-F5) show debug messages and utilities.\n");
+    // printf("Press F5 to clear screen. Have fun!\n");
     // printf("Hardware cursor is visible and responsive.\n");
     // printf("Type anything - use backspace to delete.\n");
     // printf("Function keys (F1-F5) show debug messages and utilities.\n");
