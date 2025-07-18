@@ -5,6 +5,7 @@
 #include "pci.h"
 #include "terminal.h"
 #include "types.h"
+#include "driver_manager.h"
 
 typedef void (*constructor)();
 extern "C" constructor start_ctors;
@@ -72,17 +73,29 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
     InterruptManager interrupts(0x20, &gdt);
     printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
     
-    printf("• Setting up keyboard... ");
+    printf("• Setting up driver manager... ");
+    DriverManager driver_manager;
+    printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
+    
+    printf("• Registering keyboard driver... ");
     KeyboardDriver keyboard(&interrupts);
+    driver_manager.register_driver(&keyboard);
     printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
 
-    // Can't run at the same time as the keyboard, we will need to fix this
-    // printf("• Setting up mouse... ");
+    // Uncomment when you want to enable mouse support
+    // printf("• Registering mouse driver... ");
     // MouseDriver mouse(&interrupts);
+    // driver_manager.register_driver(&mouse);
     // printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
 
     PeripheralComponentInterconnectController PCIController;
     PCIController.select_drivers();
+    
+    printf("• Initializing all drivers... ");
+    driver_manager.initialize_all_drivers();
+    
+    printf("• Activating all drivers... ");
+    driver_manager.activate_all_drivers();
     
     printf("• Activating interrupts... ");
     interrupts.activate();
@@ -90,6 +103,11 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
     
     printf("\n");
     printf_colored("System initialized successfully!\n", VGA_COLOR_GREEN_ON_BLACK);
+    driver_manager.print_driver_status();
+    printf("Hardware cursor is visible and responsive.\n");
+    printf("Type anything - use backspace to delete.\n");
+    printf("Function keys (F1-F5) show debug messages and utilities.\n");
+    printf("Press F5 to clear screen. Have fun!\n");
     // printf("Hardware cursor is visible and responsive.\n");
     // printf("Type anything - use backspace to delete.\n");
     // printf("Function keys (F1-F5) show debug messages and utilities.\n");
