@@ -97,9 +97,9 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
     printf("• Activating all drivers... ");
     driver_manager.activate_all_drivers();
     
-    // printf("• Activating interrupts... ");
-    // interrupt_manager.activate();
-    // printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
+    printf("• Activating interrupts... ");
+    interrupt_manager.activate();
+    printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
     
     // printf("\n");
     // printf_colored("System initialized successfully!\n", VGA_COLOR_GREEN_ON_BLACK);
