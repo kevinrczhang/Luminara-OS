@@ -31,6 +31,9 @@ All guest dependencies are automatically provisioned by the Vagrantfile.
    make run
    ```
 
+#### Note:
+If you want to use the mouse, you may have to run the OS through virtual box directly.
+
 ## Features
 - Print "Hello World!" (Complete)
 - GDT (Complete)
