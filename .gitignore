@@ -17,3 +17,6 @@ iso_dir/
 # Logs and temp files
 *.log
 tmp/
+
+# Ignore shell files for now
+*.sh
