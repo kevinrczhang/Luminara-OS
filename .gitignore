@@ -18,5 +18,5 @@ iso_dir/
 *.log
 tmp/
 
-# Ignore shell files for now
-*.sh
+# Shell scripts
+run_vm.sh

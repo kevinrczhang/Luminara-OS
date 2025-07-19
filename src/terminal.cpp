@@ -183,14 +183,14 @@ void int_to_string(int value, char* buffer)
     }
 
     char temp[12]; // enough for 32-bit int including minus sign
-    int i = 0;
+    int i { 0 };
 
     while (value > 0) {
         temp[i++] = '0' + (value % 10);
         value /= 10;
     }
 
-    int j = 0;
+    int j { 0 };
     if (is_negative) {
         buffer[j++] = '-';
     }
@@ -218,7 +218,7 @@ void printf_int(int value) {
 
 void printf_hex16(uint16_t value) {
     char buffer[7];
-    const char* hex = "0123456789ABCDEF";
+    const char* hex { "0123456789ABCDEF" };
     buffer[0] = hex[(value >> 12) & 0xF];
     buffer[1] = hex[(value >> 8)  & 0xF];
     buffer[2] = hex[(value >> 4)  & 0xF];

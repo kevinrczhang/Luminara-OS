@@ -25,7 +25,7 @@ void MouseDriver::initialize()
 
     command_port.write(0xa8);
     command_port.write(0x20);
-    uint8_t status = (data_port.read() | 2);
+    uint8_t status { data_port.read() | 2 };
     command_port.write(0x60);
     data_port.write(status);
 

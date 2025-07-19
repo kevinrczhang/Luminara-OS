@@ -37,7 +37,7 @@ void InterruptManager::set_interrupt_descriptor_table_entry(uint8_t interrupt,
 
     const uint8_t IDT_DESC_PRESENT { 0x80 };
     interrupt_descriptor_table[interrupt].access = IDT_DESC_PRESENT | ((descriptor_privilege_level & 3) << 5) | descriptor_type;
-    interrupt_descriptor_table[interrupt].reserved = 0; // Clear the reserved field.
+    interrupt_descriptor_table[interrupt].reserved = 0;
 }
 
 InterruptManager::InterruptManager(uint16_t hardware_interrupt_offset, GlobalDescriptorTable* global_descriptor_table)
@@ -52,7 +52,6 @@ InterruptManager::InterruptManager(uint16_t hardware_interrupt_offset, GlobalDes
 
     const uint8_t IDT_INTERRUPT_GATE { 0xE };
     
-    // Initialize all entries to ignore handler by default.
     for (uint8_t i = 255; i > 0; --i) {
         set_interrupt_descriptor_table_entry(i, code_segment, &interrupt_ignore, 0, IDT_INTERRUPT_GATE);
         handlers[i] = 0;
@@ -164,7 +163,6 @@ uint32_t InterruptManager::handle_interrupt(uint8_t interrupt, uint32_t esp)
 
 uint32_t InterruptManager::do_handle_interrupt(uint8_t interrupt, uint32_t esp)
 {
-    // If there is a handler registered, we call it, otherwise we print an error message.
     if (handlers[interrupt] != 0) {
         esp = handlers[interrupt]->handle_interrupt(esp);
     } else if (interrupt != hardware_interrupt_offset_value) {
@@ -175,7 +173,6 @@ uint32_t InterruptManager::do_handle_interrupt(uint8_t interrupt, uint32_t esp)
         printf(error_msg);
     }
 
-    // Hardware interrupts must be acknowledged.
     if (hardware_interrupt_offset_value <= interrupt && interrupt < hardware_interrupt_offset_value + 16) {
         pic_master_command_port.write(0x20);  // EOI is always sent to the master PIC.
         if (hardware_interrupt_offset_value + 8 <= interrupt) {

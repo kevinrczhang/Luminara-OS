@@ -47,7 +47,6 @@ bool DriverManager::register_driver(Driver* driver)
         return false;
     }
     
-    // Register the driver
     drivers[driver_count] = driver;
     driver_count++;
     
@@ -84,7 +83,6 @@ bool DriverManager::unregister_driver(Driver* driver)
     return true;
 }
 
-// iterate through all drivers and initialize them
 void DriverManager::initialize_all_drivers()
 {
     printf("Initializing all drivers...\n");
@@ -200,7 +198,6 @@ void DriverManager::shutdown_all_drivers()
 {
     printf("Shutting down all drivers...\n");
     
-    // Deactivate and unregister all drivers in reverse order
     for (int i = driver_count - 1; i >= 0; i--) {
         if (drivers[i] != nullptr) {
             printf("• Shutting down ");

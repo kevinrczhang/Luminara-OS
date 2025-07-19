@@ -97,7 +97,7 @@ char KeyboardDriver::apply_shift(char c)
     }
     
     if (is_shift_pressed()) {
-        switch(c)
+        switch (c)
         {
             case '1': return '!';
             case '2': return '@';
@@ -128,7 +128,7 @@ char KeyboardDriver::apply_shift(char c)
 
 void KeyboardDriver::handle_special_key(uint8_t scan_code)
 {
-    switch(scan_code)
+    switch (scan_code)
     {
         case Keyboard::KEY_F1:
             printf_colored("\n[F1] System Info: Simple OS v1.0\n", VGA_COLOR_YELLOW_ON_BLACK);
@@ -168,7 +168,7 @@ void KeyboardDriver::handle_special_key(uint8_t scan_code)
 
 void KeyboardDriver::handle_extended_key(uint8_t scan_code)
 {
-    switch(scan_code)
+    switch (scan_code)
     {
         case Keyboard::KEY_ARROW_UP:
             printf_colored(" ↑ ", VGA_COLOR_LIGHT_GRAY_ON_BLACK);
@@ -231,7 +231,7 @@ uint32_t KeyboardDriver::handle_interrupt(uint32_t esp)
         return esp;
     }
     
-    switch(scan_code)
+    switch (scan_code)
     {
         case Keyboard::KEY_LEFT_SHIFT:
             left_shift_pressed = !key_released;
@@ -261,7 +261,7 @@ uint32_t KeyboardDriver::handle_interrupt(uint32_t esp)
          return esp;
     }
     
-    switch(scan_code)
+    switch (scan_code)
     {
         case Keyboard::KEY_BACKSPACE:
             handle_backspace();
@@ -295,7 +295,7 @@ uint32_t KeyboardDriver::handle_interrupt(uint32_t esp)
         {
             char character = { 0 };
             
-            switch(scan_code)
+            switch (scan_code)
             {
                 // Number row
                 case 0x02: character = '1'; break;

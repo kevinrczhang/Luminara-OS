@@ -1,16 +1,14 @@
 #include "gdt.h"
 
 GlobalDescriptorTable::GlobalDescriptorTable()
-    : null_segment_descriptor(0, 0, 0),                                             // The first entry in any GDT must be null.
+    : null_segment_descriptor(0, 0, 0),
       unused_segment_descriptor(0, 0, 0),
-      code_segment_descriptor(0, GDT::SEGMENT_SIZE_64MB, GDT::KERNEL_CODE_SEGMENT), // Reserved for kernel code (64MB, executable).
-      data_segment_descriptor(0, GDT::SEGMENT_SIZE_64MB, GDT::KERNEL_DATA_SEGMENT)  // Reserved for kernel data (64MB, writable).
+      code_segment_descriptor(0, GDT::SEGMENT_SIZE_64MB, GDT::KERNEL_CODE_SEGMENT),
+      data_segment_descriptor(0, GDT::SEGMENT_SIZE_64MB, GDT::KERNEL_DATA_SEGMENT)
 {
-    // Creates the GDT pointer structure for LGDT instruction.
-    // The processor expects: [16-bit limit][32-bit base address].
     uint32_t gdt_descriptor[2];
-    gdt_descriptor[1] = (uint32_t)this;                        // Base address of the GDT.
-    gdt_descriptor[0] = sizeof(GlobalDescriptorTable) << 16;   // The size limit of the GDT.
+    gdt_descriptor[1] = (uint32_t) this;
+    gdt_descriptor[0] = sizeof(GlobalDescriptorTable) << 16;
     
     // This loads the GDT descriptor into the GDTR register.
     // The +2 offset skips the limit field since LGDT expects limit first, then base
@@ -19,19 +17,17 @@ GlobalDescriptorTable::GlobalDescriptorTable()
 
 GlobalDescriptorTable::~GlobalDescriptorTable()
 {
-    // This is empty since the GDT remains active until system shutdown :)
+
 }
 
 uint16_t GlobalDescriptorTable::get_data_segment_selector()
 {
-    // Calculate the offset of the data segment descriptor from the start of GDT.
-    return (uint8_t*)&data_segment_descriptor - (uint8_t*)this;
+    return (uint8_t*) &data_segment_descriptor - (uint8_t*)this;
 }
 
 uint16_t GlobalDescriptorTable::get_code_segment_selector()
 {
-    // Calculate the offset of the code segment descriptor from the start of GDT.
-    return (uint8_t*)&code_segment_descriptor - (uint8_t*)this;
+    return (uint8_t*) &code_segment_descriptor - (uint8_t*)this;
 }
 
 GlobalDescriptorTable::SegmentDescriptor::SegmentDescriptor(uint32_t base_address, uint32_t segment_limit, uint8_t access_byte)

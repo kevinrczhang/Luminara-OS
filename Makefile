@@ -1,9 +1,4 @@
-# Just for future reference, in case you forget:
-# $@ evaluates to the target.
-# $< evaluates to the first prerequisite  .
-# $^ evaluates to all prerequisites.
-# -c is for source files and -o is for the output file.
-
+# Donkey OS Makefile with WSL + VirtualBox Support
 # =============================================================================
 # Tool Configuration
 # =============================================================================
@@ -13,6 +8,10 @@ ASFLAGS := --32     # Generate 32-bit code
 
 CC      := g++      # C++ compiler  
 LD      := ld       # GNU linker
+
+# VirtualBox configuration (Windows paths from WSL)
+VBOX_VM_NAME := "Donkey OS"
+VBOX_PATH := "/mnt/c/Program Files/Oracle/VirtualBox"
 
 # =============================================================================
 # Directory Structure
@@ -25,18 +24,6 @@ INCLUDE_DIR := include
 # =============================================================================
 # Compiler Flags
 # =============================================================================
-
-# Compiler flags explained:
-# -m32: Tells the compiler to generate 32-bit code.
-# -ffreestanding: Freestanding environment (no standard library available).
-# -fno-use-cxa-atexit: Disable __cxa_atexit for destructors since the kernel doesn't have it.
-# -nostdlib: We don't want to link against standard library.
-# -fno-builtin: We don't have access to these built in functions.
-# -fno-exceptions: Disable C++ exceptions (our kernel can't handle them).
-# -fno-rtti: Disable RunTime Type Information (depends on stdlib components).
-# -fno-leading-underscore: Tells compiler to not add leading underscores to symbol names.
-# -Wno-write-strings: Disable warnings about writing to string literals (for now).
-# -I$(INCLUDE_DIR): Adds the include directory to header search path.
 
 CFLAGS := -m32 \
           -ffreestanding \
@@ -53,9 +40,6 @@ CFLAGS := -m32 \
 # Linker Flags  
 # =============================================================================
 
-# Linker flags:
-# -m elf_i386: Tells the linker to generate 32-bit ELF output.
-# -T linker.ld: Use the specified linker script we wrote.
 LDFLAGS := -m elf_i386 -T linker.ld
 
 # =============================================================================
@@ -85,13 +69,19 @@ ALL_OBJECTS := $(ASM_OBJECTS) $(CPP_OBJECTS)
 # Phony Targets
 # =============================================================================
 
-.PHONY: all iso run clean
+.PHONY: all iso run clean setup test vbox-start vbox-stop vbox-create help
+
+# =============================================================================
+# Main Targets
+# =============================================================================
+
+all: $(BUILD_DIR)/kernel.bin
+
+iso: $(BUILD_DIR)/os.iso
 
 # =============================================================================
 # Build Targets
 # =============================================================================
-
-all: $(BUILD_DIR)/kernel.bin
 
 # Assembly source files
 $(BUILD_DIR)/loader.o: $(SRC_DIR)/loader.s | $(BUILD_DIR)
@@ -131,43 +121,129 @@ $(BUILD_DIR)/mouse.o: $(SRC_DIR)/mouse.cpp | $(BUILD_DIR)
 $(BUILD_DIR)/kernel.o: $(SRC_DIR)/kernel.cpp | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# This links all the object files together to produce the kernel binary code.
+# Link kernel binary
 $(BUILD_DIR)/kernel.bin: $(ALL_OBJECTS) | $(BUILD_DIR)
 	$(LD) $(LDFLAGS) $^ -o $@
 
-# This creates a bootable ISO image.
+# Create bootable ISO
 $(BUILD_DIR)/os.iso: $(BUILD_DIR)/kernel.bin grub.cfg | $(BUILD_DIR)
-	# Create ISO directory structure
-	# The -p flag creates parent directories if they don't exist
+	@echo "Creating bootable ISO..."
 	mkdir -p iso_dir/boot/grub
 	cp $(BUILD_DIR)/kernel.bin iso_dir/boot/kernel.bin
 	cp grub.cfg iso_dir/boot/grub/
-	
-	# Generate bootable ISO using GRUB
 	grub-mkrescue -o $(BUILD_DIR)/os.iso iso_dir
+	rm -rf iso_dir
+	@echo "✓ ISO created: $(BUILD_DIR)/os.iso"
+
+# =============================================================================
+# VirtualBox Targets
+# =============================================================================
+
+vbox-check:
+	@if [ ! -f "$(VBOX_PATH)/VBoxManage.exe" ]; then \
+		echo "VirtualBox not found at: $(VBOX_PATH)"; \
+		echo "Please install VirtualBox on Windows first"; \
+		exit 1; \
+	fi
+	@echo "✓ VirtualBox found"
+
+vbox-create: vbox-check
+	@echo "Creating VirtualBox VM: $(VBOX_VM_NAME)"
+	@"$(VBOX_PATH)/VBoxManage.exe" createvm --name $(VBOX_VM_NAME) --ostype "Other" --register || echo "VM might already exist"
+	@"$(VBOX_PATH)/VBoxManage.exe" modifyvm $(VBOX_VM_NAME) --memory 512 --vram 16
+	@"$(VBOX_PATH)/VBoxManage.exe" modifyvm $(VBOX_VM_NAME) --nic1 nat
+	@"$(VBOX_PATH)/VBoxManage.exe" modifyvm $(VBOX_VM_NAME) --mouse ps2
+	@"$(VBOX_PATH)/VBoxManage.exe" modifyvm $(VBOX_VM_NAME) --keyboard ps2
+	@"$(VBOX_PATH)/VBoxManage.exe" modifyvm $(VBOX_VM_NAME) --boot1 dvd --boot2 none --boot3 none --boot4 none
+	@"$(VBOX_PATH)/VBoxManage.exe" storagectl $(VBOX_VM_NAME) --name "IDE Controller" --add ide || echo "Storage controller might already exist"
+	@echo "✓ VM created successfully!"
+
+vbox-start: vbox-check $(BUILD_DIR)/os.iso
+	@echo "Starting $(VBOX_VM_NAME)..."
+	@"$(VBOX_PATH)/VBoxManage.exe" controlvm $(VBOX_VM_NAME) poweroff 2>/dev/null || true
+	@sleep 2
+	@"$(VBOX_PATH)/VBoxManage.exe" storageattach $(VBOX_VM_NAME) --storagectl "IDE Controller" --port 0 --device 0 --type dvddrive --medium "$$(wslpath -w "$(PWD)/$(BUILD_DIR)/os.iso")"
+	@echo "✓ ISO attached, starting VM..."
+	@"$(VBOX_PATH)/VirtualBoxVM.exe" --comment $(VBOX_VM_NAME) --startvm $(VBOX_VM_NAME) &
+	@echo "VM started! Click in the window and move your mouse to test!"
+
+vbox-stop: vbox-check
+	@echo "Stopping $(VBOX_VM_NAME)..."
+	@"$(VBOX_PATH)/VBoxManage.exe" controlvm $(VBOX_VM_NAME) poweroff 2>/dev/null || echo "VM was not running"
+	@echo "✓ VM stopped"
+
+vbox-remove: vbox-check
+	@echo "Removing $(VBOX_VM_NAME)..."
+	@"$(VBOX_PATH)/VBoxManage.exe" controlvm $(VBOX_VM_NAME) poweroff 2>/dev/null || true
+	@sleep 2
+	@"$(VBOX_PATH)/VBoxManage.exe" unregistervm $(VBOX_VM_NAME) --delete 2>/dev/null || echo "VM was not registered"
+	@echo "✓ VM removed"
 
 # =============================================================================
 # Convenience Targets
 # =============================================================================
 
-iso: $(BUILD_DIR)/os.iso
+# Complete setup
+setup: vbox-create iso
+	@echo ""
+	@echo "Setup complete!"
+	@echo "Run 'make run' to start your OS"
 
-# Run with AM79C973 (AMD PCnet-PCI II) Ethernet controller (you should see it in the PCI)
-run: iso
+# Build and run
+run: iso vbox-start
+
+dev: clean run
+
+test: iso
+	@echo "✓ Build test passed"
+
+# =============================================================================
+# Legacy QEMU Targets
+# =============================================================================
+
+# Run with QEMU 
+run-qemu: iso
 	qemu-system-i386 -cdrom $(BUILD_DIR)/os.iso \
 		-display curses \
 		-netdev user,id=net0 \
 		-device pcnet,netdev=net0
 
-# Alternative: Run with Intel E1000 (this was the original setup if the top one doesn't work)
-run-e1000: iso
-	qemu-system-i386 -cdrom $(BUILD_DIR)/os.iso \
-		-display curses \
-		-netdev user,id=net0 \
-		-device e1000,netdev=net0
+# =============================================================================
+# Utility Targets
+# =============================================================================
 
 clean:
-	rm -rf $(BUILD_DIR) iso_dir
+	@echo "Cleaning build files..."
+	@rm -rf $(BUILD_DIR) iso_dir
+	@echo "✓ Clean complete"
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
+
+help:
+	@echo "🦓 Donkey OS Build System"
+	@echo "========================"
+	@echo ""
+	@echo "First-time setup:"
+	@echo "  make setup         - Create VM and build OS (run once)"
+	@echo ""
+	@echo "Development workflow:"
+	@echo "  make run           - Build and run OS (most common)"
+	@echo "  make dev           - Clean, build, and run"
+	@echo "  make test          - Just build (no run)"
+	@echo ""
+	@echo "Individual steps:"
+	@echo "  make               - Build kernel binary"
+	@echo "  make iso           - Build bootable ISO"
+	@echo "  make vbox-start    - Start VirtualBox with current ISO"
+	@echo "  make vbox-stop     - Stop VirtualBox VM"
+	@echo ""
+	@echo "Maintenance:"
+	@echo "  make clean         - Clean build files"
+	@echo "  make vbox-remove   - Remove VirtualBox VM"
+	@echo "  make help          - Show this help"
+	@echo ""
+	@echo "Mouse testing:"
+	@echo "  1. Run 'make run'"
+	@echo "  2. Click in VirtualBox window to capture mouse"
+	@echo "  3. Move mouse to test your driver!"
