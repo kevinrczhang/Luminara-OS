@@ -17,6 +17,7 @@ handle_exception_\num:
 .global handle_interrupt_request_\num
 handle_interrupt_request_\num:
     movb $\num + IRQ_BASE, (interrupt_number)
+    pushl $0
     jmp interrupt_bottom
 .endm
 
@@ -63,26 +64,31 @@ HANDLE_INTERRUPT_REQUEST 0x31  # System call (software interrupt)
 
 # Common interrupt handler bottom half
 interrupt_bottom:
-    # Save all general-purpose registers
-    pusha
-    pushl %ds
-    pushl %es
-    pushl %fs
-    pushl %gs
+    pushl %ebp
+    pushl %edi
+    pushl %esi
+
+    pushl %edx
+    pushl %ecx
+    pushl %ebx
+    pushl %eax
 
     # Call C++ interrupt handler wrapper
     pushl %esp
     push (interrupt_number)
     call handle_interrupt_wrapper
-    addl $8, %esp          # Clean up stack (2 * 4 bytes)
     movl %eax, %esp        # Switch stack if handler returned new ESP
 
-    # Restore all registers
-    popl %gs
-    popl %fs
-    popl %es
-    popl %ds
-    popa
+    popl %eax
+    popl %ebx
+    popl %ecx
+    popl %edx
+
+    popl %esi
+    popl %edi
+    popl %ebp
+
+    add $4, %esp
 
 # Default ignore handler for unimplemented interrupts
 .global interrupt_ignore

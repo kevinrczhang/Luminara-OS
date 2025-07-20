@@ -2,6 +2,7 @@
 #define INTERRUPT_MANAGER_H
 
 #include "gdt.h"
+#include "task_scheduler.h"
 #include "types.h"
 #include "port.h"
 
@@ -27,6 +28,7 @@ class InterruptManager
 protected:
     static InterruptManager* active_interrupt_manager;
     InterruptHandler* handlers[256];
+    TaskScheduler *task_scheduler;
 
     struct GateDescriptor
     {
@@ -63,7 +65,7 @@ protected:
     Port8BitSlow pic_slave_data_port;
 
 public:
-    InterruptManager(uint16_t hardware_interrupt_offset, GlobalDescriptorTable* global_descriptor_table);
+    InterruptManager(uint16_t hardware_interrupt_offset, GlobalDescriptorTable* global_descriptor_table, TaskScheduler* task_scheduler);
     ~InterruptManager();
     
     uint16_t get_hardware_interrupt_offset();

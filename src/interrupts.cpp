@@ -40,13 +40,14 @@ void InterruptManager::set_interrupt_descriptor_table_entry(uint8_t interrupt,
     interrupt_descriptor_table[interrupt].reserved = 0;
 }
 
-InterruptManager::InterruptManager(uint16_t hardware_interrupt_offset, GlobalDescriptorTable* global_descriptor_table)
+InterruptManager::InterruptManager(uint16_t hardware_interrupt_offset, GlobalDescriptorTable* global_descriptor_table, TaskScheduler* task_scheduler)
     // We initialize the pic ports with their standard addresses. See link: https://wiki.osdev.org/8259_PIC.
     : pic_master_command_port(0x20),
       pic_master_data_port(0x21),
       pic_slave_command_port(0xA0),
       pic_slave_data_port(0xA1)
 {
+    this->task_scheduler = task_scheduler;
     this->hardware_interrupt_offset_value = hardware_interrupt_offset;
     uint32_t code_segment { global_descriptor_table->get_code_segment_selector() };
 
@@ -171,6 +172,10 @@ uint32_t InterruptManager::do_handle_interrupt(uint8_t interrupt, uint32_t esp)
         error_msg[22] = hex_digits[(interrupt >> 4) & 0xF];
         error_msg[23] = hex_digits[interrupt & 0xF];
         printf(error_msg);
+    }
+
+    if (interrupt == hardware_interrupt_offset_value) {
+        esp = (uint32_t) task_scheduler->schedule((CPUState*) esp);
     }
 
     if (hardware_interrupt_offset_value <= interrupt && interrupt < hardware_interrupt_offset_value + 16) {

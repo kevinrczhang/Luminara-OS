@@ -57,6 +57,7 @@ CPP_OBJECTS := $(BUILD_DIR)/gdt.o \
 			   $(BUILD_DIR)/driver_manager.o \
 			   $(BUILD_DIR)/terminal.o \
                $(BUILD_DIR)/interrupts.o \
+			   $(BUILD_DIR)/task_scheduler.o \
 			   $(BUILD_DIR)/pci.o \
                $(BUILD_DIR)/keyboard.o \
 			   $(BUILD_DIR)/mouse.o \
@@ -107,6 +108,9 @@ $(BUILD_DIR)/terminal.o: $(SRC_DIR)/terminal.cpp | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/interrupts.o: $(SRC_DIR)/interrupts.cpp | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/task_scheduler.o: $(SRC_DIR)/task_scheduler.cpp | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/pci.o: $(SRC_DIR)/pci.cpp | $(BUILD_DIR)

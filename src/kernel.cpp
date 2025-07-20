@@ -3,9 +3,21 @@
 #include "keyboard.h"
 #include "mouse.h"
 #include "pci.h"
+#include "task_scheduler.h"
 #include "terminal.h"
 #include "types.h"
 #include "driver_manager.h"
+
+void task_doggo()
+{
+    while(true)
+        printf("Doggo");
+}
+void task_donko()
+{
+    while(true)
+        printf("Donko");
+}
 
 typedef void (*constructor)();
 extern "C" constructor start_ctors;
@@ -68,9 +80,17 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
     printf("• Setting up GDT... ");
     GlobalDescriptorTable gdt;
     printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
+
+    printf("• Setting up Task Scheduler... ");
+    TaskScheduler task_scheduler;
+    Task task1(&gdt, task_doggo);
+    Task task2(&gdt, task_donko);
+    task_scheduler.add_task(&task1);
+    task_scheduler.add_task(&task2);
+    printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
     
     printf("• Setting up interrupts... ");
-    InterruptManager interrupt_manager(0x20, &gdt);
+    InterruptManager interrupt_manager(0x20, &gdt, &task_scheduler);
     printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
     
     printf("• Setting up driver manager... ");
@@ -83,10 +103,10 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
     // printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
 
     // Uncomment when you want to enable mouse support
-    printf("• Registering mouse driver... ");
-    MouseDriver mouse(&interrupt_manager);
-    driver_manager.register_driver(&mouse);
-    printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
+    // printf("• Registering mouse driver... ");
+    // MouseDriver mouse(&interrupt_manager);
+    // driver_manager.register_driver(&mouse);
+    // printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
 
     PeripheralComponentInterconnectController PCIController;
     PCIController.select_drivers(&driver_manager, &interrupt_manager);
