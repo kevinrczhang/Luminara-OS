@@ -11,6 +11,16 @@
 void task_yield() {
     __asm__ volatile("hlt");
 }
+
+// let's just treat sleep_delay as a delay for now
+void sleep_delay(uint16_t cycles) {
+
+    for (volatile uint16_t i = 0; i < cycles; ++i) {
+        // do nothing
+    }  
+}
+
+
 void task_doggo()
 {
     while(true) {
@@ -27,14 +37,6 @@ void task_donko()
         sleep_delay(50000); 
         task_yield();
     }
-}
-
-// let's just treat sleep_delay as a delay for now
-void sleep_delay(uint16_t cycles) {
-
-    for (volatile uint16_t i = 0; i < cycles; ++i) {
-        // do nothing
-    }  
 }
 
 typedef void (*constructor)();
