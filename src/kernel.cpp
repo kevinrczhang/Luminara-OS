@@ -8,15 +8,31 @@
 #include "types.h"
 #include "driver_manager.h"
 
+void task_yield() {
+    __asm__ volatile("int $0x20");
+}
 void task_doggo()
 {
-    while(true)
-        printf("Doggo");
+    while(true) {
+        printf("hello! ok heading out now...");
+        task_yield();
+    }
+
 }
 void task_donko()
 {
-    while(true)
-        printf("Donko");
+    while(true) {
+        printf("Just woke up, heading out now...");
+        task_yield();
+    }
+}
+
+// let's just treat sleep_delay as a delay for now
+void sleep_delay(uint16_t cycles) {
+
+    for (volatile uint16_t i = 0; i < cycles; ++i) {
+        // do nothing
+    }  
 }
 
 typedef void (*constructor)();
@@ -85,8 +101,11 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
     TaskScheduler task_scheduler;
     Task task1(&gdt, task_doggo);
     Task task2(&gdt, task_donko);
+    Task task3(&gdt, task_yield);
     task_scheduler.add_task(&task1);
     task_scheduler.add_task(&task2);
+    task_scheduler.add_task(&task3);
+
     printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
     
     printf("• Setting up interrupts... ");
