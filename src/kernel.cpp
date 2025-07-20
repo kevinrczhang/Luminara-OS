@@ -101,7 +101,8 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
     TaskScheduler task_scheduler;
     Task task1(&gdt, task_doggo);
     Task task2(&gdt, task_donko);
-    Task task3(&gdt, task_yield);
+    // Task task3(&gdt, task_yield);
+    Task task3(&gdt, sleep_delay);
     task_scheduler.add_task(&task1);
     task_scheduler.add_task(&task2);
     task_scheduler.add_task(&task3);
