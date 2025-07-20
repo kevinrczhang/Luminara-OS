@@ -9,19 +9,23 @@
 #include "driver_manager.h"
 
 void task_yield() {
-    __asm__ volatile("int $0x20");
+    __asm__ volatile("hlt");
 }
 void task_doggo()
 {
     while(true) {
         printf("hello! ok heading out now...");
+        sleep_delay(50000); 
+        task_yield();
     }
-
 }
+
 void task_donko()
 {
     while(true) {
         printf("Just woke up, heading out now...");
+        sleep_delay(50000); 
+        task_yield();
     }
 }
 
@@ -99,11 +103,10 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
     TaskScheduler task_scheduler;
     Task task1(&gdt, task_doggo);
     Task task2(&gdt, task_donko);
-    // Task task3(&gdt, task_yield);
-    Task task3(&gdt, sleep_delay);
+    // Remove problematic third task for now
     task_scheduler.add_task(&task1);
     task_scheduler.add_task(&task2);
-    task_scheduler.add_task(&task3);
+    // task_scheduler.add_task(&task3);
 
     printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
     
