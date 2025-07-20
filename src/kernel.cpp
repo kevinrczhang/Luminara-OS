@@ -1,13 +1,14 @@
+#include "driver_manager.h"
 #include "gdt.h"
+#include "globals.h"
 #include "interrupts.h"
 #include "keyboard.h"
+#include "memory_manager.h"
 #include "mouse.h"
 #include "pci.h"
 #include "task_scheduler.h"
 #include "terminal.h"
 #include "types.h"
-#include "driver_manager.h"
-#include "globals.h"
 
 volatile bool tasks_should_stop = false;
 
@@ -106,29 +107,43 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
     GlobalDescriptorTable gdt;
     printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
 
-    printf("• Setting up Task Scheduler... ");
-    TaskScheduler task_scheduler;
-    Task task1(&gdt, task_doggo);
-    Task task2(&gdt, task_donko);
+    uint32_t* upper_memory = (uint32_t*) (((size_t) multiboot_structure) + 8);
+    size_t heap = 10 * 1024 * 1024;
+    MemoryManager memory_manager(heap, ((*upper_memory) * 1024) - heap - (10 * 1024));
+    
+    printf("heap: 0x");
+    printf_hex16((heap >> 16) & 0xFFFF);
+    printf_hex16((heap      ) & 0xFFFF);
+    
+    void* allocated = memory_manager.malloc(1024);
+    printf("\nallocated: 0x");
+    printf_hex16(((size_t)allocated >> 16) & 0xFFFF);
+    printf_hex16(((size_t)allocated      ) & 0xFFFF);
+    printf("\n");
+
+    // printf("• Setting up Task Scheduler... ");
+    // TaskScheduler task_scheduler;
+    // Task task1(&gdt, task_doggo);
+    // Task task2(&gdt, task_donko);
     // Remove problematic third task for now
-    task_scheduler.add_task(&task1);
-    task_scheduler.add_task(&task2);
+    // task_scheduler.add_task(&task1);
+    // task_scheduler.add_task(&task2);
     // task_scheduler.add_task(&task3);
 
-    printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
+    // printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
     
-    printf("• Setting up interrupts... ");
-    InterruptManager interrupt_manager(0x20, &gdt, &task_scheduler);
-    printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
+    // printf("• Setting up interrupts... ");
+    // InterruptManager interrupt_manager(0x20, &gdt, &task_scheduler);
+    // printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
     
-    printf("• Setting up driver manager... ");
-    DriverManager driver_manager;
-    printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
+    // printf("• Setting up driver manager... ");
+    // DriverManager driver_manager;
+    // printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
     
-    printf("• Registering keyboard driver... ");
-    KeyboardDriver keyboard(&interrupt_manager);
-    driver_manager.register_driver(&keyboard);
-    printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
+    // printf("• Registering keyboard driver... ");
+    // KeyboardDriver keyboard(&interrupt_manager);
+    // driver_manager.register_driver(&keyboard);
+    // printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
 
     // Uncomment when you want to enable mouse support
     // printf("• Registering mouse driver... ");
@@ -136,23 +151,23 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
     // driver_manager.register_driver(&mouse);
     // printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
 
-    PeripheralComponentInterconnectController PCIController;
-    PCIController.select_drivers(&driver_manager, &interrupt_manager);
+    // PeripheralComponentInterconnectController PCIController;
+    // PCIController.select_drivers(&driver_manager, &interrupt_manager);
     
-    printf("• Initializing all drivers... ");
-    driver_manager.initialize_all_drivers();
+    // printf("• Initializing all drivers... ");
+    // driver_manager.initialize_all_drivers();
     
-    printf("• Activating all drivers... ");
-    driver_manager.activate_all_drivers();
+    // printf("• Activating all drivers... ");
+    // driver_manager.activate_all_drivers();
     
-    printf("• Activating interrupts... ");
-    interrupt_manager.activate();
-    printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
+    // printf("• Activating interrupts... ");
+    // interrupt_manager.activate();
+    // printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
     
-    printf("\n");
-    printf_colored("System initialized successfully!\n", VGA_COLOR_GREEN_ON_BLACK);
-    printf_colored("Tasks are running. Press ESC to stop them.\n", VGA_COLOR_YELLOW_ON_BLACK);
-    printf_colored("Function keys (F1-F5) show debug messages.\n", VGA_COLOR_CYAN_ON_BLACK);
+    // printf("\n");
+    // printf_colored("System initialized successfully!\n", VGA_COLOR_GREEN_ON_BLACK);
+    // printf_colored("Tasks are running. Press ESC to stop them.\n", VGA_COLOR_YELLOW_ON_BLACK);
+    // printf_colored("Function keys (F1-F5) show debug messages.\n", VGA_COLOR_CYAN_ON_BLACK);
     
     while(1) {
         // To save power, we can halt until we receive the next interrupt.

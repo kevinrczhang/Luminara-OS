@@ -53,6 +53,7 @@ ASM_OBJECTS := $(BUILD_DIR)/loader.o \
 # C++ object files  
 CPP_OBJECTS := $(BUILD_DIR)/gdt.o \
                $(BUILD_DIR)/port.o \
+			   $(BUILD_DIR)/memory_manager.o \
                $(BUILD_DIR)/driver.o \
 			   $(BUILD_DIR)/driver_manager.o \
 			   $(BUILD_DIR)/terminal.o \
@@ -96,6 +97,9 @@ $(BUILD_DIR)/gdt.o: $(SRC_DIR)/gdt.cpp | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/port.o: $(SRC_DIR)/port.cpp | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/memory_manager.o: $(SRC_DIR)/memory_manager.cpp | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/driver.o: $(SRC_DIR)/driver.cpp | $(BUILD_DIR)
