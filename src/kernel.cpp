@@ -15,7 +15,6 @@ void task_doggo()
 {
     while(true) {
         printf("hello! ok heading out now...");
-        task_yield();
     }
 
 }
@@ -23,7 +22,6 @@ void task_donko()
 {
     while(true) {
         printf("Just woke up, heading out now...");
-        task_yield();
     }
 }
 
