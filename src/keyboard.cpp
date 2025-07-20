@@ -1,5 +1,7 @@
 #include "keyboard.h"
 #include "terminal.h"
+#include "globals.h"
+
 
 KeyboardDriver::KeyboardDriver(InterruptManager* manager)
     : Driver(manager, 0x21), // Initialize as Driver for IRQ 1 (0x21 = hardware offset + 1).
@@ -280,7 +282,10 @@ uint32_t KeyboardDriver::handle_interrupt(uint32_t esp)
             break;
             
         case Keyboard::KEY_ESCAPE:
-            printf_colored("\n[ESC pressed]\n", VGA_COLOR_LIGHT_GRAY_ON_BLACK);
+            __asm__ volatile("cli");
+            printf_colored("\n[ESC pressed - Stopping tasks]\n", VGA_COLOR_RED_ON_BLACK);
+            tasks_should_stop = true;
+            __asm__ volatile("sti");
             break;
             
         case Keyboard::KEY_F1:

@@ -7,6 +7,9 @@
 #include "terminal.h"
 #include "types.h"
 #include "driver_manager.h"
+#include "globals.h"
+
+volatile bool tasks_should_stop = false;
 
 void task_yield() {
     __asm__ volatile("hlt");
@@ -14,29 +17,31 @@ void task_yield() {
 
 // let's just treat sleep_delay as a delay for now
 void sleep_delay(uint16_t cycles) {
-
     for (volatile uint16_t i = 0; i < cycles; ++i) {
-        // do nothing
+        if (tasks_should_stop) {
+            break;
+        }
+        for (volatile int j = 0; j < 100; ++j);
     }  
 }
 
 
 void task_doggo()
 {
-    while(true) {
+    while(!tasks_should_stop) {
         printf("hello! ok heading out now...");
-        sleep_delay(50000); 
-        task_yield();
+        sleep_delay(100000); 
     }
+    printf("Doggo task stopped.\n");
 }
 
 void task_donko()
 {
-    while(true) {
+    while(!tasks_should_stop) {
         printf("Just woke up, heading out now...");
-        sleep_delay(50000); 
-        task_yield();
+        sleep_delay(100000); 
     }
+    printf("Donko task stopped.\n");
 }
 
 typedef void (*constructor)();
@@ -120,10 +125,10 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
     DriverManager driver_manager;
     printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
     
-    // printf("• Registering keyboard driver... ");
-    // KeyboardDriver keyboard(&interrupt_manager);
-    // driver_manager.register_driver(&keyboard);
-    // printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
+    printf("• Registering keyboard driver... ");
+    KeyboardDriver keyboard(&interrupt_manager);
+    driver_manager.register_driver(&keyboard);
+    printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
 
     // Uncomment when you want to enable mouse support
     // printf("• Registering mouse driver... ");
@@ -144,18 +149,11 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
     interrupt_manager.activate();
     printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
     
-    // printf("\n");
-    // printf_colored("System initialized successfully!\n", VGA_COLOR_GREEN_ON_BLACK);
-    // driver_manager.print_driver_status();
-    // printf("Hardware cursor is visible and responsive.\n");
-    // printf("Type anything - use backspace to delete.\n");
-    // printf("Function keys (F1-F5) show debug messages and utilities.\n");
-    // printf("Press F5 to clear screen. Have fun!\n");
-    // printf("Hardware cursor is visible and responsive.\n");
-    // printf("Type anything - use backspace to delete.\n");
-    // printf("Function keys (F1-F5) show debug messages and utilities.\n");
-    // printf("Press F5 to clear screen. Have fun!\n");
-
+    printf("\n");
+    printf_colored("System initialized successfully!\n", VGA_COLOR_GREEN_ON_BLACK);
+    printf_colored("Tasks are running. Press ESC to stop them.\n", VGA_COLOR_YELLOW_ON_BLACK);
+    printf_colored("Function keys (F1-F5) show debug messages.\n", VGA_COLOR_CYAN_ON_BLACK);
+    
     while(1) {
         // To save power, we can halt until we receive the next interrupt.
         __asm__ volatile("hlt");
