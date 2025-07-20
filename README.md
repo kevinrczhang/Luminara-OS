@@ -41,7 +41,7 @@ If you want to use the mouse, you may have to run the OS through virtual box dir
 - Drivers (WIP)
    - Keyboard Input (Complete)
    - Mouse Input (WIP)
-   - Driver Management (WIP)
+   - Driver Management (Complete)
 - PCI (WIP)
 - Task Scheduling (WIP)
 - Paging (Not started)
