@@ -87,42 +87,42 @@ void MemoryManager::free(void* ptr)
     }
 }
 
-// void* operator new(unsigned size)
-// {
-//     if (MemoryManager::memory_manager == nullptr) {
-//         return 0;
-//     }
-//     return MemoryManager::memory_manager->malloc(size);
-// }
+void* operator new(size_t size)
+{
+    if (MemoryManager::memory_manager == nullptr) {
+        return 0;
+    }
+    return MemoryManager::memory_manager->malloc(size);
+}
 
-// void* operator new[](unsigned size)
-// {
-//     if (MemoryManager::memory_manager == nullptr) {
-//         return 0;
-//     }
-//     return MemoryManager::memory_manager->malloc(size);
-// }
+void* operator new[](size_t size)
+{
+    if (MemoryManager::memory_manager == nullptr) {
+        return 0;
+    }
+    return MemoryManager::memory_manager->malloc(size);
+}
 
-// void* operator new(unsigned size, void* ptr)
-// {
-//     return ptr;
-// }
+void* operator new(size_t size, void* ptr)
+{
+    return ptr;
+}
 
-// void* operator new[](unsigned size, void* ptr)
-// {
-//     return ptr;
-// }
+void* operator new[](size_t size, void* ptr)
+{
+    return ptr;
+}
 
-// void operator delete(void* ptr)
-// {
-//     if (MemoryManager::memory_manager != nullptr) {
-//         MemoryManager::memory_manager->free(ptr);
-//     }
-// }
+void operator delete(void* ptr)
+{
+    if (MemoryManager::memory_manager != nullptr) {
+        MemoryManager::memory_manager->free(ptr);
+    }
+}
 
-// void operator delete[](void* ptr)
-// {
-//     if (MemoryManager::memory_manager != nullptr) {
-//         MemoryManager::memory_manager->free(ptr);
-//     }
-// }
+void operator delete[](void* ptr)
+{
+    if (MemoryManager::memory_manager != nullptr) {
+        MemoryManager::memory_manager->free(ptr);
+    }
+}

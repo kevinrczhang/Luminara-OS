@@ -3,6 +3,7 @@
 
 #include "driver_manager.h"
 #include "interrupts.h"
+#include "memory_manager.h"
 #include "port.h"
 #include "terminal.h"
 

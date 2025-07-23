@@ -1,3 +1,4 @@
+#include "am79c973.h"
 #include "pci.h"
 
 PeripheralComponentInterconnectDeviceDescriptor::PeripheralComponentInterconnectDeviceDescriptor()
@@ -147,14 +148,19 @@ BaseAddressRegister PeripheralComponentInterconnectController::get_base_address_
 
 Driver* PeripheralComponentInterconnectController::get_driver(PeripheralComponentInterconnectDeviceDescriptor device_descriptor, InterruptManager* interrupt_manager)
 {
-    // Does nothing right now, but we will use this in the furture to instantiate devices.
+    Driver* driver = nullptr;
+
     switch (device_descriptor.vendor_id)
     {
         case 0x1022: // AMD
             switch(device_descriptor.device_id)
             {
                 case 0x2000: // AM79C973 (AMD PCnet-PCI II)
+                    driver = (Am79C973*) MemoryManager::memory_manager->malloc(sizeof(Am79C973));
+                    if (driver != nullptr)
+                        new (driver) Am79C973(&device_descriptor, interrupt_manager);
                     printf("AMD am79c973 ");
+                    return driver;
                     break;
             }
             break;

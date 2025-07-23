@@ -11,17 +11,7 @@ Driver::~Driver()
 
 }
 
-void operator delete(void* ptr)
-{
-
-}
-
 void operator delete(void* ptr, unsigned int size)
-{
-
-}
-
-void operator delete[](void* ptr)
 {
 
 }

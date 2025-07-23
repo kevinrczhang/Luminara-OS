@@ -121,8 +121,8 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
     printf_hex16(((size_t)allocated      ) & 0xFFFF);
     printf("\n");
 
-    // printf("• Setting up Task Scheduler... ");
-    // TaskScheduler task_scheduler;
+    printf("• Setting up Task Scheduler... ");
+    TaskScheduler task_scheduler;
     // Task task1(&gdt, task_doggo);
     // Task task2(&gdt, task_donko);
     // Remove problematic third task for now
@@ -132,13 +132,13 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
 
     // printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
     
-    // printf("• Setting up interrupts... ");
-    // InterruptManager interrupt_manager(0x20, &gdt, &task_scheduler);
-    // printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
+    printf("• Setting up interrupts... ");
+    InterruptManager interrupt_manager(0x20, &gdt, &task_scheduler);
+    printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
     
-    // printf("• Setting up driver manager... ");
-    // DriverManager driver_manager;
-    // printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
+    printf("• Setting up driver manager... ");
+    DriverManager driver_manager;
+    printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
     
     // printf("• Registering keyboard driver... ");
     // KeyboardDriver keyboard(&interrupt_manager);
@@ -151,18 +151,18 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
     // driver_manager.register_driver(&mouse);
     // printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
 
-    // PeripheralComponentInterconnectController PCIController;
-    // PCIController.select_drivers(&driver_manager, &interrupt_manager);
+    PeripheralComponentInterconnectController PCIController;
+    PCIController.select_drivers(&driver_manager, &interrupt_manager);
     
-    // printf("• Initializing all drivers... ");
-    // driver_manager.initialize_all_drivers();
+    printf("• Initializing all drivers... ");
+    driver_manager.initialize_all_drivers();
     
-    // printf("• Activating all drivers... ");
-    // driver_manager.activate_all_drivers();
+    printf("• Activating all drivers... ");
+    driver_manager.activate_all_drivers();
     
-    // printf("• Activating interrupts... ");
-    // interrupt_manager.activate();
-    // printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
+    printf("• Activating interrupts... ");
+    interrupt_manager.activate();
+    printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
     
     // printf("\n");
     // printf_colored("System initialized successfully!\n", VGA_COLOR_GREEN_ON_BLACK);
