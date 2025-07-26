@@ -1,3 +1,4 @@
+#include "am79c973.h"
 #include "driver_manager.h"
 #include "gdt.h"
 #include "globals.h"
@@ -163,6 +164,16 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
     printf("• Activating interrupts... ");
     interrupt_manager.activate();
     printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
+
+    for (int i = 0; i < 10000000; i++) {
+        i++;
+    }
+
+    uint8_t num_drivers = driver_manager.get_driver_count();
+    Am79C973* am79c973 = (Am79C973*) driver_manager.get_driver(num_drivers - 1);
+    am79c973->send((uint8_t*) "Hello World", 11);
+    
+    printf(am79c973->get_driver_name());
     
     // printf("\n");
     // printf_colored("System initialized successfully!\n", VGA_COLOR_GREEN_ON_BLACK);

@@ -77,12 +77,12 @@ void PeripheralComponentInterconnectController::select_drivers(DriverManager* dr
                     if (base_address_register.address && (base_address_register.type == InputOutput)) {
                         device_descriptor.port = (uint32_t) base_address_register.address;
                     }
-                    
-                    Driver* driver { get_driver(device_descriptor, interrupt_manager) };
+                }
 
-                    if (driver != 0) {
-                        driver_manager->register_driver(driver);
-                    }
+                Driver* driver { get_driver(device_descriptor, interrupt_manager) };
+
+                if (driver != 0) {
+                    driver_manager->register_driver(driver);
                 }
                 
                 printf_colored("PCI BUS: ", VGA_COLOR_GREEN_ON_BLACK);
@@ -157,8 +157,9 @@ Driver* PeripheralComponentInterconnectController::get_driver(PeripheralComponen
             {
                 case 0x2000: // AM79C973 (AMD PCnet-PCI II)
                     driver = (Am79C973*) MemoryManager::memory_manager->malloc(sizeof(Am79C973));
-                    if (driver != nullptr)
+                    if (driver != nullptr) {
                         new (driver) Am79C973(&device_descriptor, interrupt_manager);
+                    }
                     printf("AMD am79c973 ");
                     return driver;
                     break;

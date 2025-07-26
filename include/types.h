@@ -11,6 +11,6 @@ typedef long long int           int64_t;
 typedef unsigned long long int  uint64_t;
 
 typedef const char*              string;
-typedef unsigned int             size_t;
+typedef unsigned                 size_t;
 
 #endif

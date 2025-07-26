@@ -63,6 +63,8 @@ class Am79C973 : public Driver
         void reset();
         string get_driver_name();
         uint32_t handle_interrupt(uint32_t esp);
+        void send(uint8_t* buffer, int size);
+        void receive();
 };
 
 #endif

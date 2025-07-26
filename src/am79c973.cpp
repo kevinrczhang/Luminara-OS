@@ -117,21 +117,70 @@ uint32_t Am79C973::handle_interrupt(uint32_t esp)
     
     register_address_port.write(0);
     uint32_t temp { register_data_port.read() };
+
+    printf_hex16((uint16_t) (temp & 0xFFFF));
     
     if ((temp & 0x8000) == 0x8000) printf("AMD am79c973 ERROR\n");
     if ((temp & 0x2000) == 0x2000) printf("AMD am79c973 COLLISION ERROR\n");
     if ((temp & 0x1000) == 0x1000) printf("AMD am79c973 MISSED FRAME\n");
     if ((temp & 0x0800) == 0x0800) printf("AMD am79c973 MEMORY ERROR\n");
-    if ((temp & 0x0400) == 0x0400) printf("AMD am79c973 DATA RECEVED\n");
+    if ((temp & 0x0400) == 0x0400) receive();
     if ((temp & 0x0200) == 0x0200) printf("AMD am79c973 DATA SENT\n");
                                
     // awknowledge interrupt
     register_address_port.write(0);
     register_data_port.write(temp);
     
-    if ((temp & 0x0200) == 0x0200) {
+    if ((temp & 0x0100) == 0x0100) {
         printf("AMD am79c973 INIT DONE\n");
     }
     
     return esp;
+}
+
+void Am79C973::send(uint8_t* buffer, int size)
+{
+    int send_descriptor { current_send_buffer };
+    current_send_buffer = (current_send_buffer + 1) % 8;
+    
+    // Cap the max size at 1518 bytes
+    if (size > 1518) {
+        size = 1518;
+    }
+    
+    for (uint8_t *src = buffer + size -1, *dst = (uint8_t*) (send_buffer_descriptor[send_descriptor].address + size -1); src >= buffer; --src, --dst) {
+        *dst = *src;
+    }
+    
+    send_buffer_descriptor[send_descriptor].available = 0;
+    send_buffer_descriptor[send_descriptor].flags2 = 0;
+    send_buffer_descriptor[send_descriptor].flags = 0x8300F000 | ((uint16_t)((-size) & 0xFFF));
+
+    register_address_port.write(0);
+    register_data_port.write(0x48);
+}
+
+void Am79C973::receive() {
+    printf("AMD am79c973 DATA RECEVED\n");
+
+    for (; (receive_buffer_descriptor[current_receive_buffer].flags & 0x80000000) == 0; current_receive_buffer = (current_receive_buffer + 1) % 8) {
+        if (!(receive_buffer_descriptor[current_receive_buffer].flags & 0x40000000)
+            && (receive_buffer_descriptor[current_receive_buffer].flags & 0x03000000) == 0x03000000) {
+            uint32_t size { receive_buffer_descriptor[current_receive_buffer].flags & 0xFFF };
+
+            if (size > 64) { // remove checksum
+                size -= 4;
+            }
+            
+            uint8_t* buffer { (uint8_t*) (receive_buffer_descriptor[current_receive_buffer].address) };
+            
+            for (int i = 0; i < size; ++i) {
+                printf((char*) buffer[i]);
+                printf(" ");
+            }
+        }
+        
+        receive_buffer_descriptor[current_receive_buffer].flags2 = 0;
+        receive_buffer_descriptor[current_receive_buffer].flags = 0x8000F7FF;
+    }
 }
