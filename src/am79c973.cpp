@@ -62,7 +62,7 @@ Am79C973::Am79C973(PeripheralComponentInterconnectDeviceDescriptor *device, Inte
         receive_buffer_descriptor[i].address = (((uint32_t) &receive_buffers[i]) + 15) & ~(uint32_t) 0xF;
         receive_buffer_descriptor[i].flags = 0xF7FF | 0x80000000;
         receive_buffer_descriptor[i].flags2 = 0;
-        send_buffer_descriptor[i].available = 0;
+        receive_buffer_descriptor[i].available = 0;
     }
     
     register_address_port.write(1);

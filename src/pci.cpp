@@ -199,7 +199,7 @@ PeripheralComponentInterconnectDeviceDescriptor PeripheralComponentInterconnectC
     device_descriptor.interrupt_number = read(bus_number, device_number, function_number, 0x3c);
     
     device_descriptor.bus_number = bus_number;
-    device_descriptor.device_id = device_number;
+    device_descriptor.device_number = device_number;
     device_descriptor.function_number = function_number;
     
     device_descriptor.vendor_id = read(bus_number, device_number, function_number, 0x00);
