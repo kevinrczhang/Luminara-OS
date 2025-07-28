@@ -37,15 +37,29 @@ Am79C973::Am79C973(PeripheralComponentInterconnectDeviceDescriptor *device, Inte
     register_address_port.write(0);
     register_data_port.write(0x04);
     
-    // initBlock
-    initialization_block.mode = 0x0000; // promiscuous mode = false (only receive packets for this MAC)
-    initialization_block.reserved1 = 0;
-    initialization_block.num_send_buffers = 3; // 2^3 --> 8 buffers
-    initialization_block.reserved2 = 0;
-    initialization_block.num_receive_buffers = 3; // 2^3 --> 8 buffers
-    initialization_block.physical_address = mac_address;
-    initialization_block.reserved3 = 0;
-    initialization_block.logical_address = 0; // no multicast filtering
+    for(int i = 0; i < sizeof(InitializationBlock); i++) {
+        ((uint8_t*)&initialization_block)[i] = 0;
+    }
+    
+    // Set MODE (bytes 0-1)
+    initialization_block.mode = 0x0000; // promiscuous mode = false
+    
+    // Set RLEN and TLEN (bytes 2-3) - both 3 for 8 buffers (2^3 = 8)
+    initialization_block.rlen_reserved = (3 << 4) | 0; // RLEN=3 in high nibble, reserved=0 in low nibble
+    initialization_block.tlen_reserved = (3 << 4) | 0; // TLEN=3 in high nibble, reserved=0 in low nibble
+    
+    // Set MAC address (bytes 4-9)
+    initialization_block.physical_address[0] = (uint8_t)(mac_address & 0xFF);
+    initialization_block.physical_address[1] = (uint8_t)((mac_address >> 8) & 0xFF);
+    initialization_block.physical_address[2] = (uint8_t)((mac_address >> 16) & 0xFF);
+    initialization_block.physical_address[3] = (uint8_t)((mac_address >> 24) & 0xFF);
+    initialization_block.physical_address[4] = (uint8_t)((mac_address >> 32) & 0xFF);
+    initialization_block.physical_address[5] = (uint8_t)((mac_address >> 40) & 0xFF);
+    
+    // Set reserved bytes (bytes 10-11) - already zeroed
+    
+    // Set logical address (bytes 12-19) - all zeros for no multicast filtering
+    // Already zeroed above
     
     // force 16 byte alignment
     send_buffer_descriptor = (BufferDescriptor*)((((uint32_t) &send_buffer_descriptor_memory[0]) + 15) & ~((uint32_t) 0xF));

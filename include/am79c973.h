@@ -10,19 +10,16 @@
 
 class Am79C973 : public Driver
 {
-    // Holds address of buffer descriptors
     struct InitializationBlock
     {
-        uint16_t mode;
-        unsigned reserved1 : 4;
-        unsigned num_send_buffers : 4;
-        unsigned reserved2 : 4;
-        unsigned num_receive_buffers : 4;
-        uint64_t physical_address : 48;
-        uint16_t reserved3;
-        uint64_t logical_address;
-        uint32_t send_buffer_descriptor_address;
-        uint32_t receive_buffer_descriptor_address;
+        uint16_t mode;                      // Bytes 0-1: MODE
+        uint8_t rlen_reserved;              // Byte 2: RLEN(7:4) | reserved(3:0)
+        uint8_t tlen_reserved;              // Byte 3: TLEN(7:4) | reserved(3:0)  
+        uint8_t physical_address[6];        // Bytes 4-9: MAC address
+        uint8_t reserved[2];                // Bytes 10-11: Reserved
+        uint8_t logical_address[8];         // Bytes 12-19: LADR
+        uint32_t receive_buffer_descriptor_address; // Bytes 20-23
+        uint32_t send_buffer_descriptor_address;    // Bytes 24-27
     } __attribute__((packed));
 
     struct BufferDescriptor
