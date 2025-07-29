@@ -177,7 +177,7 @@ vbox-start: vbox-check $(BUILD_DIR)/os.iso
 	@"$(VBOX_PATH)/VBoxManage.exe" storageattach $(VBOX_VM_NAME) --storagectl "IDE Controller" --port 0 --device 0 --type dvddrive --medium "$$(wslpath -w "$(PWD)/$(BUILD_DIR)/os.iso")"
 	@echo "✓ ISO attached, starting VM..."
 	@"$(VBOX_PATH)/VirtualBoxVM.exe" --comment $(VBOX_VM_NAME) --startvm $(VBOX_VM_NAME) &
-	@echo "VM started! Click in the window and move your mouse to test!"
+	@echo "VM started!"
 
 vbox-stop: vbox-check
 	@echo "Stopping $(VBOX_VM_NAME)..."
@@ -254,8 +254,3 @@ help:
 	@echo "  make clean         - Clean build files"
 	@echo "  make vbox-remove   - Remove VirtualBox VM"
 	@echo "  make help          - Show this help"
-	@echo ""
-	@echo "Mouse testing:"
-	@echo "  1. Run 'make run'"
-	@echo "  2. Click in VirtualBox window to capture mouse"
-	@echo "  3. Move mouse to test your driver!"

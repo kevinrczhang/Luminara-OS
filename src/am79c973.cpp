@@ -10,6 +10,7 @@ Am79C973::Am79C973(PeripheralComponentInterconnectDeviceDescriptor *device, Inte
     reset_port(device->port + 0x14),
     bus_control_register_data_port(device->port + 0x16)
 {
+    this->raw_data_handler = nullptr;
     current_send_buffer = 0;
     current_receive_buffer = 0;
 
@@ -134,18 +135,18 @@ uint32_t Am79C973::handle_interrupt(uint32_t esp)
 
     printf_hex16((uint16_t) (temp & 0xFFFF));
     
-    if ((temp & 0x8000) == 0x8000) printf("AMD am79c973 ERROR\n");
-    if ((temp & 0x2000) == 0x2000) printf("AMD am79c973 COLLISION ERROR\n");
-    if ((temp & 0x1000) == 0x1000) printf("AMD am79c973 MISSED FRAME\n");
-    if ((temp & 0x0800) == 0x0800) printf("AMD am79c973 MEMORY ERROR\n");
-    if ((temp & 0x0400) == 0x0400) receive();
-    if ((temp & 0x0200) == 0x0200) printf("AMD am79c973 DATA SENT\n");
+    if ((temp & STATUS_ERR) == STATUS_ERR)   printf("AMD am79c973 ERROR\n");
+    if ((temp & STATUS_CERR) == STATUS_CERR) printf("AMD am79c973 COLLISION ERROR\n");
+    if ((temp & STATUS_MISS) == STATUS_MISS) printf("AMD am79c973 MISSED FRAME\n");
+    if ((temp & STATUS_MERR) == STATUS_MERR) printf("AMD am79c973 MEMORY ERROR\n");
+    if ((temp & STATUS_RINT) == STATUS_RINT) receive();
+    if ((temp & STATUS_TINT) == STATUS_TINT) printf("AMD am79c973 DATA SENT\n");
                                
-    // awknowledge interrupt
+    // acknowledge interrupt
     register_address_port.write(0);
     register_data_port.write(temp);
     
-    if ((temp & 0x0100) == 0x0100) {
+    if ((temp & STATUS_IDON) == STATUS_IDON) {
         printf("AMD am79c973 INIT DONE\n");
     }
     
@@ -174,7 +175,8 @@ void Am79C973::send(uint8_t* buffer, int size)
     register_data_port.write(0x48);
 }
 
-void Am79C973::receive() {
+void Am79C973::receive()
+{
     printf("AMD am79c973 DATA RECEVED\n");
 
     for (; (receive_buffer_descriptor[current_receive_buffer].flags & 0x80000000) == 0; current_receive_buffer = (current_receive_buffer + 1) % 8) {
@@ -188,13 +190,49 @@ void Am79C973::receive() {
             
             uint8_t* buffer { (uint8_t*) (receive_buffer_descriptor[current_receive_buffer].address) };
             
-            for (int i = 0; i < size; ++i) {
-                printf((char*) buffer[i]);
-                printf(" ");
+            if (raw_data_handler != nullptr && raw_data_handler->on_raw_data_received(buffer, size)) {
+                send(buffer, size);
             }
         }
         
         receive_buffer_descriptor[current_receive_buffer].flags2 = 0;
         receive_buffer_descriptor[current_receive_buffer].flags = 0x8000F7FF;
     }
+}
+
+RawDataHandler::RawDataHandler(Am79C973* backend)
+{
+    this->backend = backend;
+    backend->set_handler(this);
+}
+
+RawDataHandler::~RawDataHandler()
+{
+    backend->set_handler(nullptr);
+}
+
+bool RawDataHandler::on_raw_data_received(uint8_t* buffer, uint32_t size)
+{
+    return false;
+}
+
+void RawDataHandler::send(uint8_t* buffer, uint32_t size)
+{
+    backend->send(buffer, size);
+}
+
+void Am79C973::set_handler(RawDataHandler* raw_data_handler)
+{
+    this->raw_data_handler = raw_data_handler;
+}
+
+uint64_t Am79C973::get_mac_address()
+{
+    uint64_t mac { 0 };
+
+    for (int i = 0; i < 6; ++i) {
+        mac |= ((uint64_t)initialization_block.physical_address[i]) << (i * 8);
+    }
+    
+    return mac;
 }

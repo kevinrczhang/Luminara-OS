@@ -8,18 +8,42 @@
 #include "terminal.h"
 #include "types.h"
 
+class Am79C973;
+
+class RawDataHandler
+{
+    protected:
+        Am79C973* backend;
+    
+    public:
+        RawDataHandler(Am79C973* backend);
+        ~RawDataHandler();
+
+        virtual bool on_raw_data_received(uint8_t* buffer, uint32_t size);
+
+        void send(uint8_t* buffer, uint32_t size);
+};
+
 class Am79C973 : public Driver
 {
+    static const uint32_t STATUS_ERR    = 0x8000;  // Bit 15: Error
+    static const uint32_t STATUS_CERR   = 0x2000;  // Bit 13: Collision Error
+    static const uint32_t STATUS_MISS   = 0x1000;  // Bit 12: Missed Frame
+    static const uint32_t STATUS_MERR   = 0x0800;  // Bit 11: Memory Error
+    static const uint32_t STATUS_RINT   = 0x0400;  // Bit 10: Receive Interrupt
+    static const uint32_t STATUS_TINT   = 0x0200;  // Bit 9:  Transmit Done
+    static const uint32_t STATUS_IDON   = 0x0100;  // Bit 8:  Initialization Done
+
     struct InitializationBlock
     {
-        uint16_t mode;                      // Bytes 0-1: MODE
-        uint8_t rlen_reserved;              // Byte 2: RLEN(7:4) | reserved(3:0)
-        uint8_t tlen_reserved;              // Byte 3: TLEN(7:4) | reserved(3:0)  
-        uint8_t physical_address[6];        // Bytes 4-9: MAC address
-        uint8_t reserved[2];                // Bytes 10-11: Reserved
-        uint8_t logical_address[8];         // Bytes 12-19: LADR
-        uint32_t receive_buffer_descriptor_address; // Bytes 20-23
-        uint32_t send_buffer_descriptor_address;    // Bytes 24-27
+        uint16_t mode;
+        uint8_t rlen_reserved;
+        uint8_t tlen_reserved; 
+        uint8_t physical_address[6];
+        uint8_t reserved[2];
+        uint8_t logical_address[8];
+        uint32_t receive_buffer_descriptor_address;
+        uint32_t send_buffer_descriptor_address;
     } __attribute__((packed));
 
     struct BufferDescriptor
@@ -50,6 +74,8 @@ class Am79C973 : public Driver
     uint8_t receive_buffers[2 * 1024 + 15][8];
     uint8_t current_receive_buffer;
 
+    RawDataHandler* raw_data_handler;
+
     public:
         Am79C973(PeripheralComponentInterconnectDeviceDescriptor* device, InterruptManager* interrupt_manager);
         ~Am79C973();
@@ -62,6 +88,8 @@ class Am79C973 : public Driver
         uint32_t handle_interrupt(uint32_t esp);
         void send(uint8_t* buffer, int size);
         void receive();
+        void set_handler(RawDataHandler* raw_data_handler);
+        uint64_t get_mac_address();
 };
 
 #endif
