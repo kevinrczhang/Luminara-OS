@@ -141,10 +141,10 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
     DriverManager driver_manager;
     printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
     
-    // printf("• Registering keyboard driver... ");
-    // KeyboardDriver keyboard(&interrupt_manager);
-    // driver_manager.register_driver(&keyboard);
-    // printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
+    printf("• Registering keyboard driver... ");
+    KeyboardDriver keyboard(&interrupt_manager);
+    driver_manager.register_driver(&keyboard);
+    printf_colored("OK\n", VGA_COLOR_GREEN_ON_BLACK);
 
     // Uncomment when you want to enable mouse support
     // printf("• Registering mouse driver... ");
