@@ -7,8 +7,8 @@
 // NOTE: All of these values are in big endian
 struct EthernetFrameHeader
 {
-    uint64_t destination_mac;
-    uint64_t source_mac;
+    uint64_t destination_mac : 48;
+    uint64_t source_mac : 48;
     uint16_t ether_type;
 } __attribute__((packed));
 
@@ -43,6 +43,8 @@ public:
     
     bool on_raw_data_received(uint8_t* buffer, uint32_t size);
     void send(uint64_t destination_mac, uint16_t ether_type, uint8_t* buffer, uint32_t size);
+    uint64_t get_mac_address();
+    uint32_t get_ip_address();
 };
 
 #endif

@@ -69,6 +69,7 @@ void put_char(char character);
 void put_char_colored(char character, uint8_t color);
 void printf(const char* str);
 void printf_int(int value);
+void printf_hex8(uint8_t value);
 void printf_hex16(uint16_t value);
 void printf_colored(const char* str, uint8_t color);
 

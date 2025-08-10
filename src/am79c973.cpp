@@ -166,6 +166,12 @@ void Am79C973::send(uint8_t* buffer, int size)
     for (uint8_t *src = buffer + size -1, *dst = (uint8_t*) (send_buffer_descriptor[send_descriptor].address + size -1); src >= buffer; --src, --dst) {
         *dst = *src;
     }
+
+    printf("Sending: ");
+
+    for (int i = 0; i < size; ++i) {
+        printf_hex8(buffer[i]);
+    }
     
     send_buffer_descriptor[send_descriptor].available = 0;
     send_buffer_descriptor[send_descriptor].flags2 = 0;
@@ -192,6 +198,12 @@ void Am79C973::receive()
             
             if (raw_data_handler != nullptr && raw_data_handler->on_raw_data_received(buffer, size)) {
                 send(buffer, size);
+            }
+
+            size = 64;
+
+            for (int i = 0; i < size; ++i) {
+                printf_hex8(buffer[i]);
             }
         }
         
@@ -228,11 +240,31 @@ void Am79C973::set_handler(RawDataHandler* raw_data_handler)
 
 uint64_t Am79C973::get_mac_address()
 {
-    uint64_t mac { 0 };
+    return ((uint64_t)initialization_block.physical_address[5] << 40) |
+           ((uint64_t)initialization_block.physical_address[4] << 32) |
+           ((uint64_t)initialization_block.physical_address[3] << 24) |
+           ((uint64_t)initialization_block.physical_address[2] << 16) |
+           ((uint64_t)initialization_block.physical_address[1] << 8) |
+           ((uint64_t)initialization_block.physical_address[0]);
+}
 
-    for (int i = 0; i < 6; ++i) {
-        mac |= ((uint64_t)initialization_block.physical_address[i]) << (i * 8);
-    }
+void Am79C973::set_ip_address(uint32_t ip)
+{
+    initialization_block.logical_address[0] = (uint8_t)(ip & 0xFF);
+    initialization_block.logical_address[1] = (uint8_t)((ip >> 8) & 0xFF);
+    initialization_block.logical_address[2] = (uint8_t)((ip >> 16) & 0xFF);
+    initialization_block.logical_address[3] = (uint8_t)((ip >> 24) & 0xFF);
     
-    return mac;
+    initialization_block.logical_address[4] = 0;
+    initialization_block.logical_address[5] = 0;
+    initialization_block.logical_address[6] = 0;
+    initialization_block.logical_address[7] = 0;
+}
+
+uint32_t Am79C973::get_ip_address()
+{
+    return ((uint32_t)initialization_block.logical_address[3] << 24) |
+           ((uint32_t)initialization_block.logical_address[2] << 16) |
+           ((uint32_t)initialization_block.logical_address[1] << 8) |
+           ((uint32_t)initialization_block.logical_address[0]);
 }

@@ -90,6 +90,8 @@ class Am79C973 : public Driver
         void receive();
         void set_handler(RawDataHandler* raw_data_handler);
         uint64_t get_mac_address();
+        void set_ip_address(uint32_t ip);
+        uint32_t get_ip_address();
 };
 
 #endif

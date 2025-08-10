@@ -1,4 +1,6 @@
 #include "am79c973.h"
+#include "arp.h"
+#include "ethernet_frame.h"
 #include "driver_manager.h"
 #include "gdt.h"
 #include "globals.h"
@@ -171,7 +173,22 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
 
     uint8_t num_drivers = driver_manager.get_driver_count();
     Am79C973* am79c973 = (Am79C973*) driver_manager.get_driver(num_drivers - 1);
-    am79c973->send((uint8_t*) "Hello World", 11);
+
+    auto make_ip = [](uint8_t a, uint8_t b, uint8_t c, uint8_t d) -> uint32_t {
+        return ((uint32_t)d << 24) | ((uint32_t)c << 16) | ((uint32_t)b << 8) | (uint32_t)a;
+    };
+
+    uint32_t device_ip = make_ip(10, 0, 2, 15);   // 10.0.2.15
+    uint32_t gateway_ip = make_ip(10, 0, 2, 2);   // 10.0.2.2
+
+    am79c973->set_ip_address(device_ip);
+
+    EthernetFrameProvider ethernet_frame(am79c973);
+
+    AddressResolutionProtocol arp(&ethernet_frame);
+    arp.resolve(gateway_ip);
+
+    // am79c973->send((uint8_t*) "Hello World", 11);
     
     printf(am79c973->get_driver_name());
     

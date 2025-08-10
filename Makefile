@@ -63,6 +63,8 @@ CPP_OBJECTS := $(BUILD_DIR)/gdt.o \
 			   $(BUILD_DIR)/pci.o \
                $(BUILD_DIR)/keyboard.o \
 			   $(BUILD_DIR)/mouse.o \
+			   $(BUILD_DIR)/ethernet_frame.o \
+			   $(BUILD_DIR)/arp.o \
                $(BUILD_DIR)/kernel.o
 
 # All object files
@@ -128,6 +130,12 @@ $(BUILD_DIR)/keyboard.o: $(SRC_DIR)/keyboard.cpp | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/mouse.o: $(SRC_DIR)/mouse.cpp | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/ethernet_frame.o: $(SRC_DIR)/ethernet_frame.cpp | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/arp.o: $(SRC_DIR)/arp.cpp | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/kernel.o: $(SRC_DIR)/kernel.cpp | $(BUILD_DIR)

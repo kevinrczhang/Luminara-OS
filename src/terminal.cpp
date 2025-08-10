@@ -216,6 +216,15 @@ void printf_int(int value) {
     printf(buffer);
 }
 
+void printf_hex8(uint8_t value) {
+    char buffer[3];  // 2 hex digits + null terminator
+    const char* hex { "0123456789ABCDEF" };
+    buffer[0] = hex[(value >> 4) & 0xF];
+    buffer[1] = hex[value & 0xF];
+    buffer[2] = '\0';
+    printf(buffer);
+}
+
 void printf_hex16(uint16_t value) {
     char buffer[7];
     const char* hex { "0123456789ABCDEF" };

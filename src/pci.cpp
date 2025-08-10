@@ -150,11 +150,9 @@ Driver* PeripheralComponentInterconnectController::get_driver(PeripheralComponen
 {
     Driver* driver = nullptr;
 
-    switch (device_descriptor.vendor_id)
-    {
+    switch (device_descriptor.vendor_id) {
         case 0x1022: // AMD
-            switch(device_descriptor.device_id)
-            {
+            switch(device_descriptor.device_id) {
                 case 0x2000: // AM79C973 (AMD PCnet-PCI II)
                     driver = (Am79C973*) MemoryManager::memory_manager->malloc(sizeof(Am79C973));
                     if (driver != nullptr) {
@@ -167,8 +165,7 @@ Driver* PeripheralComponentInterconnectController::get_driver(PeripheralComponen
             break;
 
         case 0x8086: // Intel
-            switch(device_descriptor.device_id)
-            {
+            switch(device_descriptor.device_id) {
                 case 0x100E: // 82540EM Gigabit Ethernet Controller
                     printf("Intel 82540EM ");
                     break;
@@ -177,11 +174,9 @@ Driver* PeripheralComponentInterconnectController::get_driver(PeripheralComponen
     }
     
     
-    switch (device_descriptor.class_code)
-    {
+    switch (device_descriptor.class_code) {
         case 0x03: // graphics
-            switch(device_descriptor.subclass)
-            {
+            switch(device_descriptor.subclass) {
                 case 0x00: // VGA
                     printf("VGA ");
                     break;
