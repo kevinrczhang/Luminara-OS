@@ -61,7 +61,7 @@ extern "C" void call_constructors()
 
 void print_donkey_ascii()
 {
-    printf_colored("############### DONKEY OS ###############\n", VGA_COLOR_YELLOW_ON_BLACK);
+    printf_colored("############### Luminara OS ###############\n", VGA_COLOR_YELLOW_ON_BLACK);
     
     // Donko
     printf_colored("       ___,A.A_  __\n", VGA_COLOR_LIGHT_GRAY_ON_BLACK);
@@ -82,7 +82,7 @@ extern "C" void kernel_main(const void* multiboot_structure, uint32_t multiboot_
 {
     initialize_terminal();
     print_donkey_ascii();
-    printf_colored("=== Donkey OS Kernel ===\n", VGA_COLOR_YELLOW_ON_BLACK);
+    printf_colored("=== Luminara OS Kernel ===\n", VGA_COLOR_YELLOW_ON_BLACK);
     
     /**
      * Remember when we pushed the multiboot magic number onto the stack in the loader.s code?

@@ -1,10 +1,10 @@
 #!/bin/bash
-# Simple Donkey OS Setup Script
+# Simple Luminara OS Setup Script
 # Prerequisites: VirtualBox installed on Windows, WSL setup
 
 set -e
 
-echo "Setting up Donkey OS..."
+echo "Setting up Luminara OS..."
 
 # Install build tools if missing
 sudo apt update
@@ -12,7 +12,7 @@ sudo apt install -y build-essential gcc-multilib g++-multilib grub-pc-bin grub-c
 
 # VirtualBox paths
 VBOX_PATH="/mnt/c/Program Files/Oracle/VirtualBox"
-VM_NAME="Donkey OS"
+VM_NAME="Luminara OS"
 
 # Remove existing VM if it exists
 "$VBOX_PATH/VBoxManage.exe" controlvm "$VM_NAME" poweroff 2>/dev/null || true
@@ -40,7 +40,7 @@ echo "ISO created: build/os.iso"
 cat > run_vm.sh << 'EOF'
 #!/bin/bash
 VBOX_PATH="/mnt/c/Program Files/Oracle/VirtualBox"
-VM_NAME="Donkey OS"
+VM_NAME="Luminara OS"
 WIN_ISO_PATH="$(wslpath -w "$(pwd)/build/os.iso")"
 
 "$VBOX_PATH/VBoxManage.exe" controlvm "$VM_NAME" poweroff 2>/dev/null || true

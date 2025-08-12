@@ -1,4 +1,4 @@
-# DonkeyOS
+# Luminara OS
 
 A minimal hobby OS project in C++
 
@@ -12,10 +12,10 @@ A minimal hobby OS project in C++
    - 🟢 Driver Management (Complete)
 - 🟢 PCI (Complete)
 - 🟢 Task Scheduling (Complete)
-- 🟡 Memory Management (WIP)
+- 🟢 Memory Management (Complete)
 - 🟡 Networking (WIP)
+- 🟡 Graphics (WIP)
 - 🔴 Paging (Not started)
-- 🔴 Graphics (Not started)
 - 🔴 Custom Bootloader (Not started)
 
 ## To Start

@@ -1,4 +1,4 @@
-# Donkey OS Makefile with WSL + VirtualBox Support
+# Luminara OS Makefile with WSL + VirtualBox Support
 # =============================================================================
 # Tool Configuration
 # =============================================================================
@@ -10,7 +10,7 @@ CC      := g++      # C++ compiler
 LD      := ld       # GNU linker
 
 # VirtualBox configuration (Windows paths from WSL)
-VBOX_VM_NAME := "Donkey OS"
+VBOX_VM_NAME := "Luminara OS"
 VBOX_PATH := "/mnt/c/Program Files/Oracle/VirtualBox"
 
 # =============================================================================
@@ -241,7 +241,7 @@ $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
 help:
-	@echo "🦓 Donkey OS Build System"
+	@echo "💫 Luminara OS Build System"
 	@echo "========================"
 	@echo ""
 	@echo "First-time setup:"
